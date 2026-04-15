@@ -68,7 +68,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   <div class="hdr-row">
     <div>
       <div class="hdr-title">Reserves</div>
-      <div class="hdr-date" id="headerDate"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="hdr-date" id="headerDate"></div><div id="syncBadge" style="font-size:11px;font-weight:700;color:var(--green);background:var(--green-pale);padding:4px 8px;border-radius:999px">Local</div></div>
     </div>
   </div>
 </div>
@@ -254,7 +254,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 let reserves = JSON.parse(localStorage.getItem('reserves') || '[]');
 let bizumsLegacy = JSON.parse(localStorage.getItem('bizums') || '[]');
 let tipusSel = 'Barbacoa';
@@ -264,9 +267,98 @@ const MESOS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','
 const DIES = ['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
 const DIES_SETMANA = ['diumenge','dilluns','dimarts','dimecres','dijous','divendres','dissabte'];
 
-function save(){
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDEfwSqPcdKwa-oB_NhLh0IiyrpID5OOew",
+  authDomain: "cancorbera-ccef7.firebaseapp.com",
+  projectId: "cancorbera-ccef7",
+  storageBucket: "cancorbera-ccef7.firebasestorage.app",
+  messagingSenderId: "146621505662",
+  appId: "1:146621505662:web:1001a208e9286c4954782f"
+};
+const FIREBASE_DOC_PATH = ['appData','main'];
+let db = null;
+let cloudEnabled = false;
+let applyingRemote = false;
+
+function firebaseReady(){
+  return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.appId);
+}
+function updateSyncBadge(text,mode='local'){
+  const el=document.getElementById('syncBadge');
+  if(!el) return;
+  el.textContent=text;
+  if(mode==='cloud'){
+    el.style.color='var(--green-dk)';
+    el.style.background='var(--green-pale)';
+  }else if(mode==='syncing'){
+    el.style.color='var(--earth-dk)';
+    el.style.background='var(--earth-pale)';
+  }else if(mode==='error'){
+    el.style.color='var(--red)';
+    el.style.background='var(--red-lt)';
+  }else{
+    el.style.color='var(--ink2)';
+    el.style.background='var(--surface2)';
+  }
+}
+function persistLocal(){
   localStorage.setItem('reserves', JSON.stringify(reserves));
 }
+async function save(){
+  persistLocal();
+  if(!cloudEnabled || !db || applyingRemote) return;
+  try{
+    updateSyncBadge('Sincronitzant','syncing');
+    await setDoc(doc(db, ...FIREBASE_DOC_PATH), { reserves, updatedAt: new Date().toISOString() });
+    updateSyncBadge('Núvol','cloud');
+  }catch(err){
+    console.error(err);
+    updateSyncBadge('Error sync','error');
+    toast('No s'ha pogut sincronitzar');
+  }
+}
+function refreshVisibleViews(){
+  renderInici();
+  if(document.getElementById('page-calendari').classList.contains('active')) renderCal();
+  if(document.getElementById('page-pagaments').classList.contains('active')) renderPagaments();
+  if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage();
+  if(document.getElementById('page-resum').classList.contains('active')) renderSummary();
+}
+async function initCloudSync(){
+  if(!firebaseReady()){
+    updateSyncBadge('Local','local');
+    return;
+  }
+  try{
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+    db = getFirestore(app);
+    const ref = doc(db, ...FIREBASE_DOC_PATH);
+    const snap = await getDoc(ref);
+    if(!snap.exists()){
+      await setDoc(ref, { reserves, updatedAt: new Date().toISOString() });
+    }
+    cloudEnabled = true;
+    updateSyncBadge('Núvol','cloud');
+    onSnapshot(ref, (remoteSnap) => {
+      const data = remoteSnap.data();
+      if(!data || !Array.isArray(data.reserves)) return;
+      applyingRemote = true;
+      reserves = data.reserves.map(normalizeReserva);
+      persistLocal();
+      refreshVisibleViews();
+      applyingRemote = false;
+    }, (error) => {
+      console.error(error);
+      updateSyncBadge('Error sync','error');
+    });
+  }catch(err){
+    console.error(err);
+    updateSyncBadge('Local','local');
+    toast('Mode local actiu');
+  }
+}
+
 const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const avui = () => new Date().toISOString().slice(0,10);
 function fmt(s){ if(!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
@@ -330,7 +422,7 @@ function recalculateReserva(r){
 }
 
 reserves = reserves.map(normalizeReserva);
-save();
+persistLocal();
 
 function getTypeIcon(t){
   if(t === 'Casa') return `<svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`;
@@ -703,6 +795,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('summary-date').value = avui();
   updateCreateSummary();
   renderInici();
+  initCloudSync();
 });
 </script>
 </body>
