@@ -133,8 +133,9 @@ body {
   display:flex; align-items:center; justify-content:center;
   font-size:22px; flex-shrink:0;
 }
-.rc-badge.bbq  { background:#FDF0E0; }
-.rc-badge.casa { background:var(--green-pale); }
+.rc-badge.bbq   { background:#FDF0E0; }
+.rc-badge.casa  { background:var(--green-pale); }
+.rc-badge.espai { background:#EEE8F5; }
 .rc-main  { flex:1; min-width:0; }
 .rc-name  { font-size:17px; font-weight:700; letter-spacing:-.3px; line-height:1.2; color:var(--ink); }
 .rc-meta  { font-size:12.5px; color:var(--ink3); font-weight:500; margin-top:3px; }
@@ -528,8 +529,9 @@ body {
     <div class="form-group">
       <label class="form-label">Espai</label>
       <div class="seg">
-        <button class="seg-btn active" id="btn-bbq"  onclick="selectTipus('BBQ')">🔥 BBQ</button>
-        <button class="seg-btn"        id="btn-casa" onclick="selectTipus('Casa')">🏠 Casa</button>
+        <button class="seg-btn" id="btn-casa"  onclick="selectTipus('Casa')">🏠 Casa</button>
+        <button class="seg-btn active" id="btn-bbq"   onclick="selectTipus('Barbacoa')">🔥 Barbacoa</button>
+        <button class="seg-btn" id="btn-espai" onclick="selectTipus('Espai nou')">✨ Espai nou</button>
       </div>
     </div>
     <div class="form-group"><label class="form-label">Preu per persona</label><input id="f-preu" type="number" class="form-input" placeholder="25 €" min="0"></div>
@@ -639,8 +641,9 @@ body {
       <div class="form-group">
         <label class="form-label">Espai</label>
         <div class="seg">
-          <button class="seg-btn active" id="m-btn-bbq"  onclick="selectTipusModal('BBQ')">🔥 BBQ</button>
-          <button class="seg-btn"        id="m-btn-casa" onclick="selectTipusModal('Casa')">🏠 Casa</button>
+          <button class="seg-btn" id="m-btn-casa"  onclick="selectTipusModal('Casa')">🏠 Casa</button>
+          <button class="seg-btn active" id="m-btn-bbq"   onclick="selectTipusModal('Barbacoa')">🔥 Barbacoa</button>
+          <button class="seg-btn" id="m-btn-espai" onclick="selectTipusModal('Espai nou')">✨ Espai nou</button>
         </div>
       </div>
       <div class="form-group"><label class="form-label">Preu per persona</label><input id="m-preu" type="number" class="form-input" placeholder="25 €" min="0"></div>
@@ -656,7 +659,7 @@ body {
 /* ═══════════════ DATA ═══════════════ */
 let reserves = JSON.parse(localStorage.getItem('reserves')||'[]');
 let bizums   = JSON.parse(localStorage.getItem('bizums')||'[]');
-let tipusSel = 'BBQ', tipusSelM = 'BBQ';
+let tipusSel = 'Barbacoa', tipusSelM = 'Barbacoa';
 let calData  = new Date(), calTriat = null;
 
 const MESOS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
@@ -703,7 +706,8 @@ function renderInici(){
 function rcHTML(r){
   const total=r.pax*r.preu, pag=r.pagat||0, pct=total>0?Math.min(100,Math.round(pag/total*100)):0;
   const st=r.estat==='confirmat'?'confirmed':'pending';
-  const ico=r.tipus==='BBQ'?'🔥':'🏠', tc=r.tipus==='BBQ'?'bbq':'casa';
+  const ico = r.tipus==='Barbacoa' ? '🔥' : r.tipus==='Espai nou' ? '✨' : '🏠';
+  const tc  = r.tipus==='Barbacoa' ? 'bbq' : r.tipus==='Espai nou' ? 'espai' : 'casa';
   return `<div class="rc ${st}" onclick="openDetall('${r.id}')">
     <div class="rc-top">
       <div class="rc-badge ${tc}">${ico}</div>
@@ -766,8 +770,18 @@ function renderCalDetall(){
 }
 
 /* ═══════════════ CREAR ═══════════════ */
-function selectTipus(t){ tipusSel=t; document.getElementById('btn-bbq').classList.toggle('active',t==='BBQ'); document.getElementById('btn-casa').classList.toggle('active',t==='Casa'); }
-function selectTipusModal(t){ tipusSelM=t; document.getElementById('m-btn-bbq').classList.toggle('active',t==='BBQ'); document.getElementById('m-btn-casa').classList.toggle('active',t==='Casa'); }
+function selectTipus(t){
+  tipusSel=t;
+  document.getElementById('btn-bbq').classList.toggle('active',t==='Barbacoa');
+  document.getElementById('btn-casa').classList.toggle('active',t==='Casa');
+  document.getElementById('btn-espai').classList.toggle('active',t==='Espai nou');
+}
+function selectTipusModal(t){
+  tipusSelM=t;
+  document.getElementById('m-btn-bbq').classList.toggle('active',t==='Barbacoa');
+  document.getElementById('m-btn-casa').classList.toggle('active',t==='Casa');
+  document.getElementById('m-btn-espai').classList.toggle('active',t==='Espai nou');
+}
 function _mkRes(n,d,p,pr,tipus,nt){ return {id:genId(),nom:n,data:d,pax:parseInt(p),preu:parseFloat(pr),tipus,estat:'pendent',pagat:0,notes:nt}; }
 
 function crearReserva(){
@@ -836,7 +850,7 @@ function openDetall(id){
     <div class="det-group">
       <div class="det-row"><span class="dk">📅 Data</span><span class="dv">${fmt(r.data)}</span></div>
       <div class="det-row"><span class="dk">👥 Persones</span><span class="dv">${r.pax} persones</span></div>
-      <div class="det-row"><span class="dk">🏡 Espai</span><span class="dv">${r.tipus==='BBQ'?'🔥 BBQ':'🏠 Casa'}</span></div>
+      <div class="det-row"><span class="dk">🏡 Espai</span><span class="dv">${r.tipus==='Barbacoa'?'🔥 Barbacoa':r.tipus==='Espai nou'?'✨ Espai nou':'🏠 Casa'}</span></div>
       <div class="det-row"><span class="dk">💶 Preu/pax</span><span class="dv">${r.preu} €</span></div>
       <div class="det-row"><span class="dk">💰 Total</span><span class="dv" style="color:var(--green);font-size:16px">${total} €</span></div>
       <div class="det-row"><span class="dk">✅ Pagat</span><span class="dv" style="color:var(--green)">${pag} €</span></div>
@@ -891,12 +905,12 @@ function calcularDiners(){
         <div class="dc-note">ja cobrat per Bizum</div>
       </div>
       <div class="dcard nos">
-        <div class="dc-eye">Nosaltres</div>
+        <div class="dc-eye">Jordi i Carla</div>
         <div class="dc-val">${nosaltres.toFixed(2)} €</div>
         <div class="dc-note">meitat − bizums</div>
       </div>
       <div class="dcard ells">
-        <div class="dc-eye">Per a ells</div>
+        <div class="dc-eye">Anna i Miquel</div>
         <div class="dc-val">${ells.toFixed(2)} €</div>
         <div class="dc-note">50% íntegre</div>
       </div>
@@ -905,7 +919,7 @@ function calcularDiners(){
       <div class="calc-line"><span class="cl-k">💰 Total del dia</span><span class="cl-v">${totalDia} €</span></div>
       <div class="calc-line"><span class="cl-k">➗ Dividit entre 2</span><span class="cl-v green">${meitat.toFixed(2)} €</span></div>
       <div class="calc-line"><span class="cl-k">📱 Bizums rebuts</span><span class="cl-v earth">− ${totalBiz} €</span></div>
-      <div class="calc-line highlight"><span class="cl-k" style="font-weight:700;color:var(--ink)">✅ Ens quedem</span><span class="cl-v strong">${nosaltres.toFixed(2)} €</span></div>
+      <div class="calc-line highlight"><span class="cl-k" style="font-weight:700;color:var(--ink)">✅ Jordi i Carla</span><span class="cl-v strong">${nosaltres.toFixed(2)} €</span></div>
     </div>`;
 }
 function addBizum(){
@@ -937,9 +951,10 @@ function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function openNovaReservaModal(){
   document.getElementById('m-data').value=avui();
-  tipusSelM='BBQ';
+  tipusSelM='Barbacoa';
   document.getElementById('m-btn-bbq').classList.add('active');
   document.getElementById('m-btn-casa').classList.remove('active');
+  document.getElementById('m-btn-espai').classList.remove('active');
   openModal('modalNova');
 }
 
