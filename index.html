@@ -22,6 +22,9 @@
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;padding-bottom:calc(var(--nav-h) + 30px);max-width:430px;margin:0 auto;-webkit-font-smoothing:antialiased}
 .hdr{background:rgba(247,245,242,.94);backdrop-filter:saturate(160%) blur(20px);-webkit-backdrop-filter:saturate(160%) blur(20px);padding:54px 22px 16px;position:sticky;top:0;z-index:60;border-bottom:1px solid var(--sep)}
 .hdr-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.hdr-title{font-size:28px;font-weight:800;letter-spacing:-.8px;line-height:1}.hdr-date{font-size:13px;color:var(--ink3);font-weight:500;margin-top:4px}
+.sync-badge{font-size:11px;font-weight:700;padding:6px 10px;border-radius:999px;background:var(--surface2);color:var(--ink3);border:1px solid var(--sep)}
+.sync-badge.cloud{background:var(--green-pale);color:var(--green-dk)}
+.sync-badge.syncing{background:var(--earth-pale);color:var(--earth-dk)}
 .page{display:none;padding:22px 16px;animation:fadeUp .22s ease both}.page.active{display:block}@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .hero,.d-hero{background:linear-gradient(145deg,var(--green-dk) 0%,var(--green) 100%);border-radius:var(--r-xl);padding:28px 26px 24px;box-shadow:var(--sh-lg);position:relative;overflow:hidden}
 .hero{margin-bottom:14px}.d-hero{margin-bottom:14px}
@@ -68,8 +71,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   <div class="hdr-row">
     <div>
       <div class="hdr-title">Reserves</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="hdr-date" id="headerDate"></div><div id="syncBadge" style="font-size:11px;font-weight:700;color:var(--green);background:var(--green-pale);padding:4px 8px;border-radius:999px">Local</div></div>
+      <div class="hdr-date" id="headerDate"></div>
     </div>
+    <div id="syncBadge" class="sync-badge">Local</div>
   </div>
 </div>
 
@@ -254,20 +258,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 </div>
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-let reserves = JSON.parse(localStorage.getItem('reserves') || '[]');
-let bizumsLegacy = JSON.parse(localStorage.getItem('bizums') || '[]');
-let tipusSel = 'Barbacoa';
-let calData = new Date(), calTriat = null;
-let summaryRange = 'weekend';
-const MESOS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
-const DIES = ['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
-const DIES_SETMANA = ['diumenge','dilluns','dimarts','dimecres','dijous','divendres','dissabte'];
-
-
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDEfwSqPcdKwa-oB_NhLh0IiyrpID5OOew",
   authDomain: "cancorbera-ccef7.firebaseapp.com",
@@ -276,91 +269,61 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "146621505662",
   appId: "1:146621505662:web:1001a208e9286c4954782f"
 };
-const FIREBASE_DOC_PATH = ['appData','main'];
+
+let reserves = JSON.parse(localStorage.getItem('reserves') || '[]');
+let bizumsLegacy = JSON.parse(localStorage.getItem('bizums') || '[]');
+let tipusSel = 'Barbacoa';
+let calData = new Date(), calTriat = null;
+let summaryRange = 'weekend';
 let db = null;
 let cloudEnabled = false;
-let applyingRemote = false;
+let cloudReady = false;
+let syncInProgress = false;
+let remoteLoadedOnce = false;
 
-function firebaseReady(){
-  return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId && FIREBASE_CONFIG.appId);
-}
-function updateSyncBadge(text,mode='local'){
-  const el=document.getElementById('syncBadge');
+const MESOS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
+const DIES = ['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
+const DIES_SETMANA = ['diumenge','dilluns','dimarts','dimecres','dijous','divendres','dissabte'];
+
+function updateSyncBadge(mode){
+  const el = document.getElementById('syncBadge');
   if(!el) return;
-  el.textContent=text;
-  if(mode==='cloud'){
-    el.style.color='var(--green-dk)';
-    el.style.background='var(--green-pale)';
-  }else if(mode==='syncing'){
-    el.style.color='var(--earth-dk)';
-    el.style.background='var(--earth-pale)';
-  }else if(mode==='error'){
-    el.style.color='var(--red)';
-    el.style.background='var(--red-lt)';
-  }else{
-    el.style.color='var(--ink2)';
-    el.style.background='var(--surface2)';
-  }
+  el.className = 'sync-badge';
+  if(mode === 'cloud'){ el.textContent = 'Núvol'; el.classList.add('cloud'); }
+  else if(mode === 'syncing'){ el.textContent = 'Sincronitzant'; el.classList.add('syncing'); }
+  else { el.textContent = 'Local'; }
 }
-function persistLocal(){
-  localStorage.setItem('reserves', JSON.stringify(reserves));
-}
-async function save(){
-  persistLocal();
-  if(!cloudEnabled || !db || applyingRemote) return;
-  try{
-    updateSyncBadge('Sincronitzant','syncing');
-    await setDoc(doc(db, ...FIREBASE_DOC_PATH), { reserves, updatedAt: new Date().toISOString() });
-    updateSyncBadge('Núvol','cloud');
-  }catch(err){
-    console.error(err);
-    updateSyncBadge('Error sync','error');
-    toast('No s'ha pogut sincronitzar');
-  }
-}
-function refreshVisibleViews(){
-  renderInici();
+
+function renderActivePage(){
+  if(document.getElementById('page-inici').classList.contains('active')) renderInici();
   if(document.getElementById('page-calendari').classList.contains('active')) renderCal();
   if(document.getElementById('page-pagaments').classList.contains('active')) renderPagaments();
   if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage();
   if(document.getElementById('page-resum').classList.contains('active')) renderSummary();
 }
-async function initCloudSync(){
-  if(!firebaseReady()){
-    updateSyncBadge('Local','local');
-    return;
-  }
+
+function saveLocalOnly(){
+  localStorage.setItem('reserves', JSON.stringify(reserves));
+}
+
+async function save(){
+  saveLocalOnly();
+  if(!cloudEnabled || !cloudReady || syncInProgress || !db) return;
   try{
-    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
-    db = getFirestore(app);
-    const ref = doc(db, ...FIREBASE_DOC_PATH);
-    const snap = await getDoc(ref);
-    if(!snap.exists()){
-      await setDoc(ref, { reserves, updatedAt: new Date().toISOString() });
-    }
-    cloudEnabled = true;
-    updateSyncBadge('Núvol','cloud');
-    onSnapshot(ref, (remoteSnap) => {
-      const data = remoteSnap.data();
-      if(!data || !Array.isArray(data.reserves)) return;
-      applyingRemote = true;
-      reserves = data.reserves.map(normalizeReserva);
-      persistLocal();
-      refreshVisibleViews();
-      applyingRemote = false;
-    }, (error) => {
-      console.error(error);
-      updateSyncBadge('Error sync','error');
-    });
+    updateSyncBadge('syncing');
+    await db.collection('appData').doc('main').set({
+      reserves: reserves,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge:true });
+    updateSyncBadge('cloud');
   }catch(err){
-    console.error(err);
-    updateSyncBadge('Local','local');
-    toast('Mode local actiu');
+    console.error('Error guardant al núvol', err);
+    updateSyncBadge('local');
   }
 }
 
-const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-const avui = () => new Date().toISOString().slice(0,10);
+function genId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function avui(){ return new Date().toISOString().slice(0,10); }
 function fmt(s){ if(!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
 function euro(n){ return `${Number(n || 0).toFixed(Number.isInteger(Number(n || 0)) ? 0 : 2)} €`; }
@@ -421,8 +384,60 @@ function recalculateReserva(r){
   else r.estat = 'pendent';
 }
 
-reserves = reserves.map(normalizeReserva);
-persistLocal();
+function normalizeAllReserves(arr){
+  return (arr || []).map(normalizeReserva);
+}
+
+reserves = normalizeAllReserves(reserves);
+saveLocalOnly();
+
+function initFirebase(){
+  try{
+    if(!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.projectId){
+      updateSyncBadge('local');
+      return;
+    }
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    cloudEnabled = true;
+    updateSyncBadge('syncing');
+    db.collection('appData').doc('main').onSnapshot(async (docSnap) => {
+      syncInProgress = true;
+      try{
+        if(docSnap.exists && Array.isArray(docSnap.data().reserves)){
+          reserves = normalizeAllReserves(docSnap.data().reserves);
+          saveLocalOnly();
+          remoteLoadedOnce = true;
+          cloudReady = true;
+          updateSyncBadge('cloud');
+          renderActivePage();
+        } else {
+          cloudReady = true;
+          remoteLoadedOnce = true;
+          if(reserves.length){
+            await db.collection('appData').doc('main').set({
+              reserves: reserves,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge:true });
+          }
+          updateSyncBadge('cloud');
+        }
+      }catch(err){
+        console.error('Error llegint dades del núvol', err);
+        updateSyncBadge('local');
+      } finally {
+        syncInProgress = false;
+      }
+    }, (error) => {
+      console.error('onSnapshot error', error);
+      updateSyncBadge('local');
+      syncInProgress = false;
+    });
+  }catch(err){
+    console.error('Firebase init error', err);
+    updateSyncBadge('local');
+  }
+}
 
 function getTypeIcon(t){
   if(t === 'Casa') return `<svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`;
@@ -505,7 +520,7 @@ function renderCal(){
     ds = other ? '' : `${y}-${mm}-${dd}`;
     const dr = ds ? reserves.filter(r => r.data===ds) : [];
     const hasPend = dr.some(r => r.estat==='pendent');
-    const isT = ds===ts && !other, isCh = calTriat===ds && !other;
+    const isT = ds===avui() && !other, isCh = calTriat===ds && !other;
     let cls='cal-cell';
     if(other) cls+=' other';
     if(isT) cls+=' today';
@@ -578,10 +593,14 @@ function clearCreateForm(){
   document.getElementById('f-metode').value='Bizum';
   tipusSel='Barbacoa'; selectTipus('Barbacoa'); updateCreateSummary();
 }
-function crearReserva(){
+async function crearReserva(){
   const r = buildReservaFromForm();
   if(!r) return;
-  reserves.push(r); save(); clearCreateForm(); toast('Reserva creada'); showPage('inici',null,document.getElementById('nav-inici'));
+  reserves.push(r);
+  await save();
+  clearCreateForm();
+  toast('Reserva creada');
+  showPage('inici',null,document.getElementById('nav-inici'));
 }
 
 function renderPagaments(){
@@ -664,7 +683,7 @@ function updatePaymentAmountSuggestion(){
   recalculateReserva(r);
   document.getElementById('pay-amount').value = type === 'deposit' ? Math.max(0, r.depositRequired - r.depositPaid) : Math.max(0, r.pending);
 }
-function savePaymentFromModal(){
+async function savePaymentFromModal(){
   const id = document.getElementById('pay-reserva-id').value;
   const type = document.getElementById('pay-type').value;
   const amount = Number(document.getElementById('pay-amount').value || 0);
@@ -673,9 +692,28 @@ function savePaymentFromModal(){
   const receiver = document.getElementById('pay-receiver').value || '';
   const r = reserves.find(x => x.id === id); if(!r || amount <= 0){ toast('Revisa l\'import del pagament'); return; }
   r.payments.push({id:genId(), type, amount, date, method, receiver});
-  recalculateReserva(r); save(); closeModal('modalPagament'); closeModal('modalDetall'); openDetall(id); renderInici(); renderPagaments(); if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage(); if(document.getElementById('page-resum').classList.contains('active')) renderSummary(); toast('Pagament guardat');
+  recalculateReserva(r);
+  await save();
+  closeModal('modalPagament');
+  closeModal('modalDetall');
+  openDetall(id);
+  renderInici();
+  renderPagaments();
+  if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage();
+  if(document.getElementById('page-resum').classList.contains('active')) renderSummary();
+  toast('Pagament guardat');
 }
-function eliminarReserva(id){ if(!confirm('Eliminar aquesta reserva?')) return; reserves = reserves.filter(x => x.id !== id); save(); closeModal('modalDetall'); renderInici(); renderPagaments(); if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage(); if(document.getElementById('page-resum').classList.contains('active')) renderSummary(); toast('Reserva eliminada'); }
+async function eliminarReserva(id){
+  if(!confirm('Eliminar aquesta reserva?')) return;
+  reserves = reserves.filter(x => x.id !== id);
+  await save();
+  closeModal('modalDetall');
+  renderInici();
+  renderPagaments();
+  if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage();
+  if(document.getElementById('page-resum').classList.contains('active')) renderSummary();
+  toast('Reserva eliminada');
+}
 
 function renderDinersPage(){
   const data = document.getElementById('diners-data').value; if(!data) return;
@@ -795,7 +833,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('summary-date').value = avui();
   updateCreateSummary();
   renderInici();
-  initCloudSync();
+  initFirebase();
 });
 </script>
 </body>
