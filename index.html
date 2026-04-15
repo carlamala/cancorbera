@@ -7,469 +7,63 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:          #F7F5F2;
-  --bg2:         #F0EDE8;
-  --surface:     #FFFFFF;
-  --surface2:    #F7F5F2;
-  --surface3:    #EDE9E3;
-
-  --green:       #5E8C6A;
-  --green-lt:    #CFE8D5;
-  --green-pale:  #E8F4EC;
-  --green-dk:    #3D6348;
-
-  --earth:       #BFA181;
-  --earth-lt:    #EDE3D6;
-  --earth-pale:  #F5EFE6;
-  --earth-dk:    #8A6B4A;
-
-  --red:         #B56B6B;
-  --red-lt:      #F5E6E6;
-
-  --ink:         #2D2A26;
-  --ink2:        #5C5650;
-  --ink3:        #9C9490;
-  --ink4:        #C8C2BB;
-
-  --sep:         rgba(93,80,65,0.1);
-  --nav-h:       68px; /* altura nav inferior */
-
-  --r-xl:  26px;
-  --r-lg:  20px;
-  --r-md:  14px;
-  --r-sm:  10px;
-
-  --sh:    0 1px 4px rgba(45,42,38,.05), 0 4px 20px rgba(45,42,38,.06);
-  --sh-md: 0 2px 8px rgba(45,42,38,.08), 0 8px 28px rgba(45,42,38,.08);
-  --sh-lg: 0 4px 16px rgba(45,42,38,.1), 0 16px 48px rgba(45,42,38,.1);
+  --bg:#F7F5F2; --bg2:#F0EDE8; --surface:#FFFFFF; --surface2:#F7F5F2; --surface3:#EDE9E3;
+  --green:#5E8C6A; --green-lt:#CFE8D5; --green-pale:#E8F4EC; --green-dk:#3D6348;
+  --earth:#BFA181; --earth-lt:#EDE3D6; --earth-pale:#F5EFE6; --earth-dk:#8A6B4A;
+  --red:#B56B6B; --red-lt:#F5E6E6;
+  --ink:#2D2A26; --ink2:#5C5650; --ink3:#9C9490; --ink4:#C8C2BB;
+  --sep:rgba(93,80,65,0.1); --nav-h:72px;
+  --r-xl:26px; --r-lg:20px; --r-md:14px; --r-sm:10px;
+  --sh:0 1px 4px rgba(45,42,38,.05),0 4px 20px rgba(45,42,38,.06);
+  --sh-md:0 2px 8px rgba(45,42,38,.08),0 8px 28px rgba(45,42,38,.08);
+  --sh-lg:0 4px 16px rgba(45,42,38,.1),0 16px 48px rgba(45,42,38,.1);
 }
-
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 100dvh;
-  padding-bottom: calc(var(--nav-h) + 24px);
-  max-width: 430px;
-  margin: 0 auto;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── HEADER ── */
-.hdr {
-  background: rgba(247,245,242,.94);
-  backdrop-filter: saturate(160%) blur(20px);
-  -webkit-backdrop-filter: saturate(160%) blur(20px);
-  padding: 54px 22px 16px;
-  position: sticky; top: 0; z-index: 60;
-  border-bottom: 1px solid var(--sep);
-}
-.hdr-row  { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
-.hdr-title { font-size:28px; font-weight:800; letter-spacing:-0.8px; line-height:1; color:var(--ink); }
-.hdr-date  { font-size:13px; color:var(--ink3); font-weight:500; margin-top:4px; }
-
-/* botó + al header — ocult ara, el "Nova" és a la nav */
-.add-btn { display:none; }
-
-/* ── PAGES ── */
-.page { display:none; padding:22px 16px; animation:fadeUp .22s ease both; }
-.page.active { display:block; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
-/* ── HERO BANNER ── */
-.hero {
-  background: linear-gradient(145deg, var(--green-dk) 0%, var(--green) 100%);
-  border-radius: var(--r-xl);
-  padding: 28px 26px 24px;
-  margin-bottom: 14px;
-  box-shadow: var(--sh-lg);
-  position:relative; overflow:hidden;
-}
-.hero::before {
-  content:''; position:absolute; width:240px; height:240px; border-radius:50%;
-  background:rgba(255,255,255,.06); top:-90px; right:-70px; pointer-events:none;
-}
-.hero::after {
-  content:''; position:absolute; width:120px; height:120px; border-radius:50%;
-  background:rgba(255,255,255,.04); bottom:-30px; left:-20px; pointer-events:none;
-}
-.hero-eye   { font-size:11px; font-weight:700; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:1.4px; margin-bottom:8px; }
-.hero-amt   { font-size:52px; font-weight:800; color:#fff; letter-spacing:-2.5px; line-height:1; }
-.hero-footer{ display:flex; align-items:center; gap:8px; margin-top:14px; flex-wrap:wrap; }
-.hero-chip  {
-  display:flex; align-items:center; gap:5px;
-  background:rgba(255,255,255,.15); border-radius:20px;
-  padding:5px 12px; font-size:12px; font-weight:600; color:rgba(255,255,255,.85);
-}
-.dot-g { width:6px; height:6px; border-radius:50%; background:#A8D5BA; flex-shrink:0; }
-
-/* ── STAT PAIR ── */
-.stat-pair { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
-.stat-box  { background:var(--surface); border-radius:var(--r-lg); padding:18px 20px; box-shadow:var(--sh); border:1px solid var(--sep); }
-.sb-label  { font-size:11px; font-weight:700; color:var(--ink3); text-transform:uppercase; letter-spacing:.7px; margin-bottom:6px; }
-.sb-val    { font-size:26px; font-weight:800; letter-spacing:-1px; line-height:1; }
-.sb-sub    { font-size:11px; font-weight:500; color:var(--ink4); margin-top:4px; }
-.stat-box.green .sb-val { color:var(--green); }
-.stat-box.earth .sb-val { color:var(--earth-dk); }
-
-/* ── SECTION LABEL ── */
-.slabel { font-size:11px; font-weight:700; color:var(--ink3); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:12px; padding-left:2px; }
-
-/* ── RESERVA CARD ── */
-.rc {
-  background:var(--surface); border-radius:var(--r-lg);
-  margin-bottom:12px; box-shadow:var(--sh); cursor:pointer;
-  overflow:hidden; transition:transform .13s, box-shadow .13s;
-  border:1px solid var(--sep);
-}
-.rc:active { transform:scale(.984); box-shadow:0 1px 6px rgba(45,42,38,.05); }
-.rc.confirmed { border-left:4px solid var(--green); }
-.rc.pending   { border-left:4px solid var(--earth); }
-.rc-top   { display:flex; align-items:center; gap:14px; padding:16px 18px 12px; }
-.rc-badge {
-  width:48px; height:48px; border-radius:var(--r-md);
-  display:flex; align-items:center; justify-content:center;
-  font-size:22px; flex-shrink:0;
-}
-.rc-badge.bbq   { background:#FDF0E0; }
-.rc-badge.casa  { background:var(--green-pale); }
-.rc-badge.espai { background:#EEE8F5; }
-.rc-main  { flex:1; min-width:0; }
-.rc-name  { font-size:17px; font-weight:700; letter-spacing:-.3px; line-height:1.2; color:var(--ink); }
-.rc-meta  { font-size:12.5px; color:var(--ink3); font-weight:500; margin-top:3px; }
-.rc-price-col { text-align:right; flex-shrink:0; }
-.rc-price     { font-size:19px; font-weight:800; letter-spacing:-.5px; color:var(--ink); line-height:1; }
-.rc-price-sub { font-size:11px; color:var(--ink4); font-weight:500; margin-top:3px; }
-.rc-pills { display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:0 18px 14px; }
-.pill { display:inline-flex; align-items:center; gap:4px; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:600; line-height:1; }
-.pill.pax  { background:var(--green-pale); color:var(--green-dk); }
-.pill.tipo { background:var(--earth-pale); color:var(--earth-dk); }
-.pill.ok   { background:var(--green-lt);   color:var(--green-dk); }
-.pill.wait { background:var(--earth-lt);   color:var(--earth-dk); }
-.rc-bar      { height:3px; background:var(--bg2); }
-.rc-bar-fill { height:100%; transition:width .5s cubic-bezier(.4,0,.2,1); }
-.rc.confirmed .rc-bar-fill { background:var(--green); }
-.rc.pending   .rc-bar-fill { background:var(--earth); }
-
-/* ── EMPTY ── */
-.empty     { text-align:center; padding:56px 20px; }
-.empty-icon{ font-size:44px; margin-bottom:12px; }
-.empty-txt { font-size:14px; font-weight:600; color:var(--ink3); }
-
-/* ── CALENDAR ── */
-.cal-card  { background:var(--surface); border-radius:var(--r-xl); padding:22px 20px; box-shadow:var(--sh); margin-bottom:16px; border:1px solid var(--sep); }
-.cal-hdr   { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-.cal-ml    { font-size:20px; font-weight:800; letter-spacing:-.4px; color:var(--ink); }
-.cal-arrow {
-  width:38px; height:38px; border-radius:50%;
-  background:var(--green-pale); border:none;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  font-size:18px; color:var(--green); font-weight:700;
-  transition:background .12s, transform .1s;
-}
-.cal-arrow:active { background:var(--green-lt); transform:scale(.88); }
-.cal-dows  { display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:8px; }
-.cal-dow   { text-align:center; font-size:10px; font-weight:700; color:var(--ink4); text-transform:uppercase; letter-spacing:.4px; padding-bottom:4px; }
-.cal-grid  { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
-.cal-cell  {
-  aspect-ratio:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  border-radius:12px; cursor:pointer;
-  transition:background .12s, transform .1s;
-  gap:3px; user-select:none;
-}
-.cal-cell:active { transform:scale(.83); }
-.cal-num   { font-size:14px; font-weight:600; line-height:1; color:var(--ink); }
-.cal-cell.other .cal-num  { color:var(--ink4); font-weight:400; }
-.cal-cell.today           { background:var(--green); box-shadow:0 3px 12px rgba(94,140,106,.35); }
-.cal-cell.today .cal-num  { color:white; font-weight:800; }
-.cal-cell.today .cal-dot  { background:rgba(255,255,255,.8) !important; }
-.cal-cell.chosen:not(.today) { background:var(--green-lt); outline:2px solid var(--green); outline-offset:-2px; }
-.cal-cell.chosen:not(.today) .cal-num { color:var(--green-dk); font-weight:800; }
-.cal-dot   { width:5px; height:5px; border-radius:50%; }
-.cal-cell.has-green .cal-dot { background:var(--green); }
-.cal-cell.has-earth .cal-dot { background:var(--earth); }
-.cal-detail-hdr { font-size:15px; font-weight:700; margin-bottom:12px; color:var(--ink2); letter-spacing:-.2px; }
-
-/* ── FORM ── */
-.form-card  { background:var(--surface); border-radius:var(--r-xl); padding:26px 22px; box-shadow:var(--sh); border:1px solid var(--sep); }
-.form-title { font-size:24px; font-weight:800; letter-spacing:-.5px; margin-bottom:26px; color:var(--ink); }
-.form-group { margin-bottom:18px; }
-.form-label { font-size:11px; font-weight:700; color:var(--ink3); text-transform:uppercase; letter-spacing:.9px; display:block; margin-bottom:8px; }
-.form-input {
-  width:100%; padding:16px 18px; border-radius:var(--r-md);
-  background:var(--surface2); border:1.5px solid transparent;
-  font-family:'Inter',sans-serif; font-size:16px; font-weight:500;
-  color:var(--ink); outline:none; -webkit-appearance:none; appearance:none;
-  transition:border-color .18s, background .18s, box-shadow .18s;
-}
-.form-input::placeholder { color:var(--ink4); }
-.form-input:focus { background:white; border-color:var(--green); box-shadow:0 0 0 4px rgba(94,140,106,.12); }
-.seg { display:flex; background:var(--surface2); border-radius:var(--r-md); padding:4px; gap:4px; }
-.seg-btn {
-  flex:1; padding:14px 10px; border-radius:calc(var(--r-md) - 3px);
-  background:transparent; border:none; font-family:'Inter',sans-serif;
-  font-size:15px; font-weight:600; color:var(--ink3);
-  cursor:pointer; transition:all .18s; text-align:center;
-}
-.seg-btn.active { background:white; color:var(--green); font-weight:700; box-shadow:0 1px 6px rgba(45,42,38,.1), 0 0 0 .5px rgba(45,42,38,.05); }
-.btn-primary {
-  width:100%; padding:18px; border-radius:var(--r-lg);
-  background:var(--green); border:none;
-  font-family:'Inter',sans-serif; font-size:16px; font-weight:700;
-  color:white; cursor:pointer;
-  box-shadow:0 4px 18px rgba(94,140,106,.38);
-  transition:transform .14s, opacity .14s; margin-top:10px;
-}
-.btn-primary:active { transform:scale(.97); opacity:.9; }
-.btn-danger {
-  background:none; color:var(--red); border:1.5px solid rgba(181,107,107,.25);
-  padding:13px 24px; font-size:14px; border-radius:var(--r-md);
-  font-family:'Inter',sans-serif; font-weight:600; cursor:pointer;
-  transition:background .14s, transform .1s;
-}
-.btn-danger:active { background:var(--red-lt); transform:scale(.96); }
-
-/* ── PAGAMENTS ── */
-.pagos-wrap     { background:var(--surface); border-radius:var(--r-xl); overflow:hidden; box-shadow:var(--sh); border:1px solid var(--sep); }
-.pago-row       { display:flex; align-items:center; gap:14px; padding:16px 18px; border-bottom:1px solid var(--sep); cursor:pointer; transition:background .12s; }
-.pago-row:last-child { border-bottom:none; }
-.pago-row:active{ background:var(--surface2); }
-.pago-av        { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:20px; }
-.pago-av.paid   { background:var(--green-pale); }
-.pago-av.partial{ background:var(--earth-pale); }
-.pago-info      { flex:1; min-width:0; }
-.pago-name      { font-size:15px; font-weight:700; letter-spacing:-.2px; color:var(--ink); }
-.pago-sub       { font-size:12px; color:var(--ink3); font-weight:500; margin-top:2px; }
-.pago-prog      { height:4px; background:var(--surface3); border-radius:10px; margin-top:8px; overflow:hidden; }
-.pago-prog-fill { height:100%; border-radius:10px; background:var(--green); transition:width .4s; }
-.pago-right     { text-align:right; flex-shrink:0; }
-.pago-paid      { font-size:15px; font-weight:800; color:var(--green); letter-spacing:-.3px; }
-.pago-pend      { font-size:11px; font-weight:700; color:var(--earth-dk); margin-top:2px; }
-.pago-done      { font-size:11px; font-weight:700; color:var(--green); margin-top:2px; }
-
-/* ── DINERS ── */
-.diners-date-row { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
-.diners-lbl      { font-size:13px; font-weight:600; color:var(--ink2); white-space:nowrap; }
-.d-hero {
-  background:linear-gradient(145deg, var(--green-dk), var(--green));
-  border-radius:var(--r-xl); padding:28px 26px 24px;
-  margin-bottom:14px; box-shadow:var(--sh-lg);
-  position:relative; overflow:hidden;
-}
-.d-hero::before {
-  content:''; position:absolute; width:200px; height:200px; border-radius:50%;
-  background:rgba(255,255,255,.06); top:-60px; right:-50px; pointer-events:none;
-}
-.dh-eye  { font-size:11px; font-weight:700; color:rgba(255,255,255,.55); text-transform:uppercase; letter-spacing:1.3px; margin-bottom:6px; }
-.dh-val  { font-size:54px; font-weight:800; color:white; letter-spacing:-3px; line-height:1; }
-.dh-foot { font-size:13px; color:rgba(255,255,255,.55); margin-top:9px; font-weight:500; }
-.diners-grid-4  { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-.dcard { border-radius:var(--r-lg); padding:18px 16px; position:relative; overflow:hidden; border:1px solid var(--sep); }
-.dcard::after {
-  content:''; position:absolute; width:90px; height:90px; border-radius:50%;
-  background:rgba(255,255,255,.1); bottom:-25px; right:-20px; pointer-events:none;
-}
-.dcard.total  { background:var(--surface); }
-.dcard.meitat { background:var(--green-pale); }
-.dcard.nos    { background:var(--green-lt); }
-.dcard.ells   { background:var(--earth-lt); }
-.dc-eye  { font-size:10px; font-weight:700; color:var(--ink3); text-transform:uppercase; letter-spacing:.8px; margin-bottom:7px; }
-.dc-val  { font-size:24px; font-weight:800; letter-spacing:-1px; line-height:1; color:var(--ink); }
-.dc-note { font-size:11px; color:var(--ink3); margin-top:5px; font-weight:500; }
-.dcard.nos .dc-val  { color:var(--green-dk); }
-.dcard.nos .dc-eye  { color:var(--green); }
-.dcard.ells .dc-val { color:var(--earth-dk); }
-.dcard.ells .dc-eye { color:var(--earth); }
-.calc-block { background:var(--surface); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--sh); margin-bottom:14px; border:1px solid var(--sep); }
-.calc-line  { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--sep); }
-.calc-line:last-child { border-bottom:none; }
-.calc-line.highlight  { background:var(--green-pale); }
-.cl-k { font-size:13px; color:var(--ink2); font-weight:600; }
-.cl-v { font-size:14px; font-weight:800; letter-spacing:-.2px; }
-.cl-v.green  { color:var(--green-dk); }
-.cl-v.earth  { color:var(--earth-dk); }
-.cl-v.strong { color:var(--green); font-size:16px; }
-
-/* ── BIZUM ── */
-.biz-block    { background:var(--surface); border-radius:var(--r-lg); padding:20px; box-shadow:var(--sh); border:1px solid var(--sep); margin-bottom:12px; }
-.biz-title    { font-size:15px; font-weight:700; letter-spacing:-.2px; margin-bottom:14px; color:var(--ink); }
-.biz-item     { display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--sep); }
-.biz-item:last-child { border-bottom:none; }
-.biz-av       { width:34px; height:34px; border-radius:50%; background:var(--green-pale); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
-.biz-name     { font-size:14px; font-weight:600; flex:1; color:var(--ink); }
-.biz-amt      { font-size:14px; font-weight:800; color:var(--green-dk); }
-.biz-del      { width:28px; height:28px; border-radius:50%; background:var(--surface2); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--ink4); transition:background .12s, color .12s; }
-.biz-del:active { background:var(--red-lt); color:var(--red); }
-.biz-add-row  { display:flex; gap:8px; margin-top:6px; }
-.btn-add-biz  { width:100%; padding:15px; background:var(--green-pale); border:none; border-radius:var(--r-md); font-family:'Inter',sans-serif; font-size:14px; font-weight:700; color:var(--green-dk); cursor:pointer; margin-top:10px; transition:background .15s, transform .1s; }
-.btn-add-biz:active { background:var(--green-lt); transform:scale(.98); }
-
-/* ════════════════════════════════════════
-   NAV INFERIOR — minimalista, icones de línia
-   ════════════════════════════════════════ */
-.bnav {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 430px;
-  height: var(--nav-h);
-  background: rgba(251,249,246,.96);
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-  border-top: 1px solid rgba(93,80,65,.08);
-  display: flex; align-items: stretch;
-  z-index: 100;
-  /* Safe area per iPhone */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Ítem normal */
-.ni {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 5px;
-  cursor: pointer; border: none; background: none;
-  font-family: 'Inter', sans-serif;
-  padding: 10px 4px 8px;
-  transition: transform .15s;
-  position: relative;
-}
-.ni:active { transform: scale(.88); }
-
-.ni-svg {
-  width: 22px; height: 22px; flex-shrink: 0;
-  stroke: var(--ink4);
-  transition: stroke .2s;
-}
-.ni-label {
-  font-size: 10px; font-weight: 600;
-  color: var(--ink4); letter-spacing: .2px;
-  transition: color .2s;
-}
-
-/* Estat actiu: color verd suau */
-.ni.active .ni-svg   { stroke: var(--green); }
-.ni.active .ni-label { color: var(--green); }
-
-/* Punt indicador sota l'icona actiu */
-.ni.active::after {
-  content: '';
-  position: absolute; bottom: 6px;
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--green); opacity: .5;
-}
-
-/* ── Botó central "Nova" ── */
-/* No sobreeixit, integrat i elegant */
-.ni-nova {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 5px;
-  cursor: pointer; border: none; background: none;
-  font-family: 'Inter', sans-serif;
-  padding: 10px 4px 8px;
-  transition: transform .15s;
-  position: relative;
-}
-.ni-nova:active { transform: scale(.88); }
-
-.ni-nova-ring {
-  width: 38px; height: 38px; border-radius: 50%;
-  border: 1.5px solid rgba(94,140,106,.35);
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .2s, background .2s;
-  background: transparent;
-}
-.ni-nova.active .ni-nova-ring {
-  border-color: var(--green);
-  background: var(--green-pale);
-}
-.ni-nova .ni-svg {
-  width: 18px; height: 18px;
-  stroke: var(--ink3);
-  transition: stroke .2s;
-}
-.ni-nova.active .ni-svg { stroke: var(--green); }
-
-.ni-nova .ni-label {
-  font-size: 10px; font-weight: 600;
-  color: var(--ink4); letter-spacing: .2px;
-  transition: color .2s;
-}
-.ni-nova.active .ni-label { color: var(--green); }
-.ni-nova.active::after {
-  content: '';
-  position: absolute; bottom: 6px;
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--green); opacity: .5;
-}
-
-/* ── MODAL ── */
-.modal-ov {
-  position:fixed; inset:0;
-  background:rgba(45,42,38,.45);
-  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  z-index:200; display:flex; align-items:flex-end;
-  opacity:0; pointer-events:none; transition:opacity .22s;
-}
-.modal-ov.open { opacity:1; pointer-events:all; }
-.modal {
-  background:var(--surface); border-radius:28px 28px 0 0;
-  width:100%; max-width:430px; margin:0 auto;
-  padding:0 20px 56px;
-  transform:translateY(100%);
-  transition:transform .32s cubic-bezier(.32,0,.15,1);
-  max-height:92dvh; overflow-y:auto;
-}
-.modal-ov.open .modal { transform:translateY(0); }
-.modal-sticky { position:sticky; top:0; background:white; padding:16px 0 10px; z-index:2; }
-.modal-handle { width:40px; height:4px; background:var(--surface3); border-radius:2px; margin:0 auto 18px; }
-.modal-title  { font-size:22px; font-weight:800; letter-spacing:-.4px; color:var(--ink); }
-
-/* ── DETALL ── */
-.det-group { background:var(--surface2); border-radius:var(--r-lg); overflow:hidden; margin-bottom:16px; border:1px solid var(--sep); }
-.det-row   { display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--sep); }
-.det-row:last-child { border-bottom:none; }
-.dk { font-size:13px; color:var(--ink3); font-weight:600; }
-.dv { font-size:14px; font-weight:700; color:var(--ink); letter-spacing:-.1px; }
-.status-pill           { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:700; }
-.status-pill.confirmed { background:var(--green-lt);  color:var(--green-dk); }
-.status-pill.pending   { background:var(--earth-lt);  color:var(--earth-dk); }
-.act-btn {
-  width:100%; padding:18px; border-radius:var(--r-lg);
-  border:none; font-family:'Inter',sans-serif;
-  font-size:15px; font-weight:700; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  transition:transform .13s, opacity .13s; margin-bottom:10px;
-}
-.act-btn:active { transform:scale(.97); opacity:.88; }
-.act-btn.senal   { background:var(--earth-lt);   color:var(--earth-dk); }
-.act-btn.full    { background:var(--green-lt);   color:var(--green-dk); }
-.act-btn.confirm { background:var(--green-pale); color:var(--green-dk); border:1.5px solid var(--green-lt); }
-.prog-wrap   { margin-bottom:18px; }
-.prog-track  { height:8px; background:var(--surface3); border-radius:10px; overflow:hidden; }
-.prog-fill   { height:100%; border-radius:10px; background:var(--green); transition:width .5s cubic-bezier(.4,0,.2,1); }
-.prog-labels { display:flex; justify-content:space-between; margin-top:6px; }
-.prog-pct    { font-size:11px; font-weight:800; color:var(--green); }
-.prog-rest   { font-size:11px; font-weight:600; color:var(--ink3); }
-
-/* ── TOAST ── */
-.toast {
-  position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-12px);
-  background:var(--ink); color:white;
-  padding:11px 22px; border-radius:30px;
-  font-size:13px; font-weight:700; z-index:400; opacity:0; pointer-events:none;
-  box-shadow:0 8px 28px rgba(45,42,38,.25);
-  transition:all .28s cubic-bezier(.34,1.56,.64,1);
-  white-space:nowrap; letter-spacing:-.1px;
-}
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-::-webkit-scrollbar { width:0; height:0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;padding-bottom:calc(var(--nav-h) + 30px);max-width:430px;margin:0 auto;-webkit-font-smoothing:antialiased}
+.hdr{background:rgba(247,245,242,.94);backdrop-filter:saturate(160%) blur(20px);-webkit-backdrop-filter:saturate(160%) blur(20px);padding:54px 22px 16px;position:sticky;top:0;z-index:60;border-bottom:1px solid var(--sep)}
+.hdr-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.hdr-title{font-size:28px;font-weight:800;letter-spacing:-.8px;line-height:1}.hdr-date{font-size:13px;color:var(--ink3);font-weight:500;margin-top:4px}
+.page{display:none;padding:22px 16px;animation:fadeUp .22s ease both}.page.active{display:block}@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.hero,.d-hero{background:linear-gradient(145deg,var(--green-dk) 0%,var(--green) 100%);border-radius:var(--r-xl);padding:28px 26px 24px;box-shadow:var(--sh-lg);position:relative;overflow:hidden}
+.hero{margin-bottom:14px}.d-hero{margin-bottom:14px}
+.hero::before,.d-hero::before{content:'';position:absolute;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.06);top:-90px;right:-70px;pointer-events:none}
+.hero::after{content:'';position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04);bottom:-30px;left:-20px;pointer-events:none}
+.hero-eye,.dh-eye{font-size:11px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:8px}
+.hero-amt,.dh-val{font-size:52px;font-weight:800;color:#fff;letter-spacing:-2.5px;line-height:1}.dh-val{font-size:54px;letter-spacing:-3px}
+.hero-footer{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}.hero-chip{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:rgba(255,255,255,.85)}.dot-g{width:6px;height:6px;border-radius:50%;background:#A8D5BA;flex-shrink:0}
+.stat-pair,.diners-grid-4,.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat-pair{margin-bottom:22px}.diners-grid-4,.stats-grid{margin-bottom:14px}
+.stat-box,.cal-card,.form-card,.biz-block,.sum-card,.range-switch,.filter-card,.stats-list,.calc-block,.pagos-wrap{background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--sh);border:1px solid var(--sep)}
+.stat-box{padding:18px 20px;border-radius:var(--r-lg)}.sb-label,.slabel,.form-label,.dc-eye,.range-label{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px}
+.sb-val{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1}.sb-sub{font-size:11px;font-weight:500;color:var(--ink4);margin-top:4px}.stat-box.green .sb-val{color:var(--green)}.stat-box.earth .sb-val{color:var(--earth-dk)}
+.slabel{letter-spacing:1.2px;margin-bottom:12px;padding-left:2px}
+.rc{background:var(--surface);border-radius:var(--r-lg);margin-bottom:12px;box-shadow:var(--sh);cursor:pointer;overflow:hidden;transition:transform .13s,box-shadow .13s;border:1px solid var(--sep)}.rc:active{transform:scale(.984)}.rc.confirmed{border-left:4px solid var(--green)}.rc.pending{border-left:4px solid var(--earth)}
+.rc-top{display:flex;align-items:center;gap:14px;padding:16px 18px 12px}.rc-badge{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface2)}
+.rc-badge svg{width:22px;height:22px;stroke:var(--ink2);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}.rc-badge.bbq{background:#FDF0E0}.rc-badge.casa{background:var(--green-pale)}.rc-badge.espai{background:#EEE8F5}
+.rc-main{flex:1;min-width:0}.rc-name{font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.2}.rc-meta{font-size:12.5px;color:var(--ink3);font-weight:500;margin-top:3px}.rc-price-col{text-align:right;flex-shrink:0}.rc-price{font-size:19px;font-weight:800;letter-spacing:-.5px;line-height:1}.rc-price-sub{font-size:11px;color:var(--ink4);font-weight:500;margin-top:3px}
+.rc-pills{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 18px 14px}.pill{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:600;line-height:1}.pill.pax{background:var(--green-pale);color:var(--green-dk)}.pill.tipo{background:var(--earth-pale);color:var(--earth-dk)}.pill.ok{background:var(--green-lt);color:var(--green-dk)}.pill.wait{background:var(--earth-lt);color:var(--earth-dk)}.pill.info{background:var(--surface2);color:var(--ink2)}
+.rc-bar{height:3px;background:var(--bg2)}.rc-bar-fill{height:100%;transition:width .5s cubic-bezier(.4,0,.2,1)}.rc.confirmed .rc-bar-fill{background:var(--green)}.rc.pending .rc-bar-fill{background:var(--earth)}
+.empty{text-align:center;padding:56px 20px}.empty-txt{font-size:14px;font-weight:600;color:var(--ink3)}
+.cal-card{padding:22px 20px;margin-bottom:16px;border-radius:var(--r-xl)}.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.cal-ml{font-size:20px;font-weight:800;letter-spacing:-.4px}.cal-arrow{width:38px;height:38px;border-radius:50%;background:var(--green-pale);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--green);font-weight:700}.cal-arrow:active{background:var(--green-lt);transform:scale(.88)}
+.cal-dows{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px}.cal-dow{text-align:center;font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;padding-bottom:4px}.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background .12s,transform .1s;gap:3px;user-select:none}.cal-cell:active{transform:scale(.83)}.cal-num{font-size:14px;font-weight:600;line-height:1}.cal-cell.other .cal-num{color:var(--ink4);font-weight:400}.cal-cell.today{background:var(--green);box-shadow:0 3px 12px rgba(94,140,106,.35)}.cal-cell.today .cal-num{color:white;font-weight:800}.cal-cell.today .cal-dot{background:rgba(255,255,255,.8)!important}.cal-cell.chosen:not(.today){background:var(--green-lt);outline:2px solid var(--green);outline-offset:-2px}.cal-cell.chosen:not(.today) .cal-num{color:var(--green-dk);font-weight:800}.cal-dot{width:5px;height:5px;border-radius:50%}.cal-cell.has-green .cal-dot{background:var(--green)}.cal-cell.has-earth .cal-dot{background:var(--earth)}.cal-detail-hdr{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--ink2);letter-spacing:-.2px}
+.form-card{padding:26px 22px;border-radius:var(--r-xl)}.form-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:26px}.form-group{margin-bottom:18px}.form-input,.form-select{width:100%;padding:16px 18px;border-radius:var(--r-md);background:var(--surface2);border:1.5px solid transparent;font-family:'Inter',sans-serif;font-size:16px;font-weight:500;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;transition:border-color .18s,background .18s,box-shadow .18s}.form-input::placeholder{color:var(--ink4)}.form-input:focus,.form-select:focus{background:white;border-color:var(--green);box-shadow:0 0 0 4px rgba(94,140,106,.12)}.seg{display:flex;background:var(--surface2);border-radius:var(--r-md);padding:4px;gap:4px}.seg-btn{flex:1;padding:14px 10px;border-radius:calc(var(--r-md) - 3px);background:transparent;border:none;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:var(--ink3);cursor:pointer}.seg-btn.active{background:white;color:var(--green);font-weight:700;box-shadow:0 1px 6px rgba(45,42,38,.1),0 0 0 .5px rgba(45,42,38,.05)}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inline-summary{background:var(--surface2);border-radius:var(--r-lg);padding:14px 16px;border:1px solid var(--sep);margin-bottom:18px}.inline-summary-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0}.inline-summary-row strong{font-size:14px}.inline-summary-row span{font-size:13px;color:var(--ink2);font-weight:600}
+.btn-primary{width:100%;padding:18px;border-radius:var(--r-lg);background:var(--green);border:none;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;color:white;cursor:pointer;box-shadow:0 4px 18px rgba(94,140,106,.38);transition:transform .14s,opacity .14s;margin-top:10px}.btn-primary:active{transform:scale(.97);opacity:.9}
+.btn-secondary{width:100%;padding:15px;border-radius:var(--r-md);background:var(--green-pale);color:var(--green-dk);border:none;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer}.btn-secondary:active{transform:scale(.98)}
+.btn-danger{background:none;color:var(--red);border:1.5px solid rgba(181,107,107,.25);padding:13px 24px;font-size:14px;border-radius:var(--r-md);font-family:'Inter',sans-serif;font-weight:600;cursor:pointer}.btn-danger:active{background:var(--red-lt);transform:scale(.96)}
+.pagos-wrap{overflow:hidden;border-radius:var(--r-xl)}.pago-row{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--sep);cursor:pointer;transition:background .12s}.pago-row:last-child{border-bottom:none}.pago-row:active{background:var(--surface2)}.pago-av{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--green-pale)}.pago-av svg{width:18px;height:18px;stroke:var(--green-dk);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}.pago-info{flex:1;min-width:0}.pago-name{font-size:15px;font-weight:700;letter-spacing:-.2px}.pago-sub{font-size:12px;color:var(--ink3);font-weight:500;margin-top:2px}.pago-prog{height:4px;background:var(--surface3);border-radius:10px;margin-top:8px;overflow:hidden}.pago-prog-fill{height:100%;border-radius:10px;background:var(--green);transition:width .4s}.pago-right{text-align:right;flex-shrink:0}.pago-paid{font-size:15px;font-weight:800;color:var(--green);letter-spacing:-.3px}.pago-pend{font-size:11px;font-weight:700;color:var(--earth-dk);margin-top:2px}.pago-done{font-size:11px;font-weight:700;color:var(--green);margin-top:2px}
+.diners-date-row{display:flex;align-items:center;gap:10px;margin-bottom:20px}.diners-lbl{font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}.dh-foot{font-size:13px;color:rgba(255,255,255,.55);margin-top:9px;font-weight:500}
+.dcard{border-radius:var(--r-lg);padding:18px 16px;position:relative;overflow:hidden;border:1px solid var(--sep)}.dcard.total{background:var(--surface)}.dcard.meitat{background:var(--green-pale)}.dcard.nos{background:var(--green-lt)}.dcard.ells{background:var(--earth-lt)}.dc-val{font-size:24px;font-weight:800;letter-spacing:-1px;line-height:1;color:var(--ink)}.dc-note{font-size:11px;color:var(--ink3);margin-top:5px;font-weight:500}.dcard.nos .dc-val{color:var(--green-dk)}.dcard.nos .dc-eye{color:var(--green)}.dcard.ells .dc-val{color:var(--earth-dk)}.dcard.ells .dc-eye{color:var(--earth)}
+.calc-block{overflow:hidden;border-radius:var(--r-lg);margin-bottom:14px}.calc-line,.stats-list .row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sep)}.calc-line:last-child,.stats-list .row:last-child{border-bottom:none}.calc-line.highlight{background:var(--green-pale)}.cl-k{font-size:13px;color:var(--ink2);font-weight:600}.cl-v{font-size:14px;font-weight:800;letter-spacing:-.2px}.cl-v.green{color:var(--green-dk)}.cl-v.earth{color:var(--earth-dk)}.cl-v.strong{color:var(--green);font-size:16px}
+.biz-block{padding:20px;border-radius:var(--r-lg);margin-bottom:12px}.biz-title{font-size:15px;font-weight:700;letter-spacing:-.2px;margin-bottom:14px}.biz-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--sep)}.biz-item:last-child{border-bottom:none}.biz-av{width:34px;height:34px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0}.biz-av svg{width:16px;height:16px;stroke:var(--green-dk);stroke-width:1.7;fill:none}.biz-name{font-size:14px;font-weight:600;flex:1}.biz-sub{font-size:12px;color:var(--ink3);font-weight:500}.biz-meta{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.biz-amt{font-size:14px;font-weight:800;color:var(--green-dk)}.biz-del{width:28px;height:28px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink4)}.biz-del:active{background:var(--red-lt);color:var(--red)}
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:rgba(251,249,246,.96);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-top:1px solid rgba(93,80,65,.08);display:flex;align-items:stretch;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);overflow-x:auto}
+.ni,.ni-nova{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;padding:10px 4px 8px;transition:transform .15s;position:relative;min-width:66px}.ni:active,.ni-nova:active{transform:scale(.88)}.ni-svg{width:22px;height:22px;flex-shrink:0;stroke:var(--ink4);transition:stroke .2s}.ni-label{font-size:10px;font-weight:600;color:var(--ink4);letter-spacing:.2px;transition:color .2s}.ni.active .ni-svg,.ni-nova.active .ni-svg{stroke:var(--green)}.ni.active .ni-label,.ni-nova.active .ni-label{color:var(--green)}.ni.active::after,.ni-nova.active::after{content:'';position:absolute;bottom:6px;width:4px;height:4px;border-radius:50%;background:var(--green);opacity:.5}.ni-nova-ring{width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(94,140,106,.35);display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s;background:transparent}.ni-nova.active .ni-nova-ring{border-color:var(--green);background:var(--green-pale)}.ni-nova .ni-svg{width:18px;height:18px;stroke:var(--ink3)}
+.modal-ov{position:fixed;inset:0;background:rgba(45,42,38,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .22s}.modal-ov.open{opacity:1;pointer-events:all}.modal{background:var(--surface);border-radius:28px 28px 0 0;width:100%;max-width:430px;margin:0 auto;padding:0 20px 56px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,0,.15,1);max-height:92dvh;overflow-y:auto}.modal-ov.open .modal{transform:translateY(0)}.modal-sticky{position:sticky;top:0;background:white;padding:16px 0 10px;z-index:2}.modal-handle{width:40px;height:4px;background:var(--surface3);border-radius:2px;margin:0 auto 18px}.modal-title{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.det-group{background:var(--surface2);border-radius:var(--r-lg);overflow:hidden;margin-bottom:16px;border:1px solid var(--sep)}.det-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--sep);gap:10px}.det-row:last-child{border-bottom:none}.dk{font-size:13px;color:var(--ink3);font-weight:600}.dv{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.1px;text-align:right}.status-pill{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:700}.status-pill.confirmed{background:var(--green-lt);color:var(--green-dk)}.status-pill.pending{background:var(--earth-lt);color:var(--earth-dk)}.act-btn{width:100%;padding:18px;border-radius:var(--r-lg);border:none;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .13s,opacity .13s;margin-bottom:10px}.act-btn:active{transform:scale(.97);opacity:.88}.act-btn.senal{background:var(--earth-lt);color:var(--earth-dk)}.act-btn.full{background:var(--green-lt);color:var(--green-dk)}.act-btn.confirm{background:var(--green-pale);color:var(--green-dk);border:1.5px solid var(--green-lt)}.prog-wrap{margin-bottom:18px}.prog-track{height:8px;background:var(--surface3);border-radius:10px;overflow:hidden}.prog-fill{height:100%;border-radius:10px;background:var(--green);transition:width .5s cubic-bezier(.4,0,.2,1)}.prog-labels{display:flex;justify-content:space-between;margin-top:6px}.prog-pct{font-size:11px;font-weight:800;color:var(--green)}.prog-rest{font-size:11px;font-weight:600;color:var(--ink3)}
+.sum-card{padding:18px 18px 8px;margin-bottom:14px;border-radius:var(--r-lg)}.sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}.sum-title{font-size:15px;font-weight:800;letter-spacing:-.2px}.sum-sub{font-size:12px;color:var(--ink3);font-weight:500;margin-top:2px}.range-switch{display:flex;padding:4px;gap:4px;margin-bottom:14px;border-radius:var(--r-lg)}.range-btn{flex:1;padding:12px 10px;border:none;border-radius:calc(var(--r-lg) - 4px);background:transparent;color:var(--ink3);font-family:'Inter',sans-serif;font-weight:700;font-size:13px}.range-btn.active{background:white;color:var(--green);box-shadow:0 1px 6px rgba(45,42,38,.1)}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-12px);background:var(--ink);color:white;padding:11px 22px;border-radius:30px;font-size:13px;font-weight:700;z-index:400;opacity:0;pointer-events:none;box-shadow:0 8px 28px rgba(45,42,38,.25);transition:all .28s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;letter-spacing:-.1px}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:0;height:0}
 </style>
 </head>
 <body>
-
-<!-- HEADER (sense botó +, sense tabs) -->
 <div class="hdr">
   <div class="hdr-row">
     <div>
@@ -479,7 +73,6 @@ body {
   </div>
 </div>
 
-<!-- AVUI -->
 <div id="page-inici" class="page active">
   <div class="hero">
     <div class="hero-eye">Total del dia</div>
@@ -490,22 +83,13 @@ body {
     </div>
   </div>
   <div class="stat-pair">
-    <div class="stat-box green">
-      <div class="sb-label">Cobrat</div>
-      <div class="sb-val" id="cobratDia">0 €</div>
-      <div class="sb-sub">ja pagat</div>
-    </div>
-    <div class="stat-box earth">
-      <div class="sb-label">Pendent</div>
-      <div class="sb-val" id="pendentDia">0 €</div>
-      <div class="sb-sub">per cobrar</div>
-    </div>
+    <div class="stat-box green"><div class="sb-label">Cobrat</div><div class="sb-val" id="cobratDia">0 €</div><div class="sb-sub">ja pagat</div></div>
+    <div class="stat-box earth"><div class="sb-label">Pendent</div><div class="sb-val" id="pendentDia">0 €</div><div class="sb-sub">per cobrar</div></div>
   </div>
   <div class="slabel">Reserves d'avui</div>
   <div id="reservesAvui"></div>
 </div>
 
-<!-- CALENDARI -->
 <div id="page-calendari" class="page">
   <div class="cal-card">
     <div class="cal-hdr">
@@ -519,449 +103,605 @@ body {
   <div id="calDetall"></div>
 </div>
 
-<!-- NOVA RESERVA -->
 <div id="page-crear" class="page">
   <div class="form-card">
-    <div class="form-title">Nova Reserva</div>
+    <div class="form-title">Nova reserva</div>
     <div class="form-group"><label class="form-label">Nom del client</label><input id="f-nom" type="text" class="form-input" placeholder="Ex: Pere Garcia"></div>
-    <div class="form-group"><label class="form-label">Data</label><input id="f-data" type="date" class="form-input"></div>
-    <div class="form-group"><label class="form-label">Nombre de persones</label><input id="f-pax" type="number" class="form-input" placeholder="Ex: 21" min="1"></div>
+    <div class="field-grid">
+      <div class="form-group"><label class="form-label">Telèfon</label><input id="f-telefon" type="tel" class="form-input" placeholder="Ex: 600 000 000"></div>
+      <div class="form-group"><label class="form-label">Data</label><input id="f-data" type="date" class="form-input"></div>
+    </div>
     <div class="form-group">
       <label class="form-label">Espai</label>
       <div class="seg">
-        <button class="seg-btn" id="btn-casa"  onclick="selectTipus('Casa')">🏠 Casa</button>
-        <button class="seg-btn active" id="btn-bbq"   onclick="selectTipus('Barbacoa')">🔥 Barbacoa</button>
-        <button class="seg-btn" id="btn-espai" onclick="selectTipus('Espai nou')">✨ Espai nou</button>
+        <button class="seg-btn" id="btn-casa" onclick="selectTipus('Casa')">Casa</button>
+        <button class="seg-btn active" id="btn-bbq" onclick="selectTipus('Barbacoa')">Barbacoa</button>
+        <button class="seg-btn" id="btn-espai" onclick="selectTipus('Espai nou')">Espai nou</button>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Preu per persona</label><input id="f-preu" type="number" class="form-input" placeholder="25 €" min="0"></div>
-    <div class="form-group"><label class="form-label">Notes (opcional)</label><input id="f-notes" type="text" class="form-input" placeholder="Al·lèrgies, menú especial..."></div>
-    <button class="btn-primary" onclick="crearReserva()">Crear Reserva</button>
+    <div class="field-grid">
+      <div class="form-group"><label class="form-label">Adults</label><input id="f-adults" type="number" class="form-input" placeholder="0" min="0" value="0" oninput="updateCreateSummary()"></div>
+      <div class="form-group"><label class="form-label">Preu adult</label><input id="f-preu-adult" type="number" class="form-input" placeholder="12" min="0" step="0.01" oninput="updateCreateSummary()"></div>
+    </div>
+    <div class="field-grid">
+      <div class="form-group"><label class="form-label">Nens</label><input id="f-children" type="number" class="form-input" placeholder="0" min="0" value="0" oninput="updateCreateSummary()"></div>
+      <div class="form-group"><label class="form-label">Preu nen</label><input id="f-preu-nen" type="number" class="form-input" placeholder="0" min="0" step="0.01" oninput="updateCreateSummary()"></div>
+    </div>
+    <div class="inline-summary">
+      <div class="inline-summary-row"><span>Total adults</span><strong id="sumAdults">0 €</strong></div>
+      <div class="inline-summary-row"><span>Total nens</span><strong id="sumChildren">0 €</strong></div>
+      <div class="inline-summary-row"><span>Total general</span><strong id="sumTotal">0 €</strong></div>
+    </div>
+    <div class="field-grid">
+      <div class="form-group"><label class="form-label">Senyal requerida</label><input id="f-senyal" type="number" class="form-input" min="0" step="0.01" value="50"></div>
+      <div class="form-group"><label class="form-label">Mètode senyal</label>
+        <select id="f-metode" class="form-select">
+          <option value="Bizum">Bizum</option>
+          <option value="Transferència">Transferència</option>
+          <option value="Efectiu">Efectiu</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-grid">
+      <div class="form-group"><label class="form-label">Rebuda per</label>
+        <select id="f-receptor" class="form-select">
+          <option value="">Sense indicar</option>
+          <option>Jordi</option><option>Carla</option><option>Anna</option><option>Miquel</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Data del Bizum</label><input id="f-bizum-data" type="date" class="form-input"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Import senyal pagada</label><input id="f-senyal-pagada" type="number" class="form-input" placeholder="50" min="0" step="0.01" value="0"></div>
+    <div class="form-group"><label class="form-label">Notes</label><input id="f-notes" type="text" class="form-input" placeholder="Al·lèrgies, menú especial..."></div>
+    <button class="btn-primary" onclick="crearReserva()">Crear reserva</button>
   </div>
 </div>
 
-<!-- PAGAMENTS -->
 <div id="page-pagaments" class="page">
-  <div class="slabel">Estat dels pagaments</div>
+  <div class="slabel">Pagaments i senyals</div>
   <div id="llistaPagaments"></div>
 </div>
 
-<!-- DINERS -->
 <div id="page-diners" class="page">
   <div class="diners-date-row">
     <div class="diners-lbl">Dia:</div>
-    <input id="diners-data" type="date" class="form-input" style="flex:1" onchange="calcularDiners();renderBizums();">
+    <input id="diners-data" type="date" class="form-input" style="flex:1" onchange="renderDinersPage()">
   </div>
   <div id="diners-resultat"></div>
   <div class="biz-block">
-    <div class="biz-title">📱 Bizums rebuts</div>
+    <div class="biz-title">Senyals vinculades a aquest dia</div>
     <div id="bizum-llista"></div>
-    <div class="biz-add-row">
-      <input id="bizum-nom"    type="text"   class="form-input" placeholder="Nom" style="flex:1;padding:13px 15px;font-size:14px">
-      <input id="bizum-import" type="number" class="form-input" placeholder="€"   style="width:84px;padding:13px 14px;font-size:14px">
-    </div>
-    <button class="btn-add-biz" onclick="addBizum()">+ Afegir Bizum</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     NAV INFERIOR — icones SVG de línia
-     ══════════════════════════════════════ -->
-<nav class="bnav">
-
-  <!-- Avui -->
-  <button class="ni active" id="nav-inici" onclick="showPage('inici',null,this)">
-    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
-      <path d="M9 21V12h6v9"/>
-    </svg>
-    <span class="ni-label">Avui</span>
-  </button>
-
-  <!-- Calendari -->
-  <button class="ni" id="nav-calendari" onclick="showPage('calendari',null,this)">
-    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="3"/>
-      <path d="M16 2v4M8 2v4M3 10h18"/>
-      <circle cx="8.5" cy="15.5" r=".8" fill="currentColor" stroke="none"/>
-      <circle cx="12" cy="15.5" r=".8" fill="currentColor" stroke="none"/>
-      <circle cx="15.5" cy="15.5" r=".8" fill="currentColor" stroke="none"/>
-    </svg>
-    <span class="ni-label">Calendari</span>
-  </button>
-
-  <!-- Nova (central, amb anell) -->
-  <button class="ni-nova" id="nav-crear" onclick="showPage('crear',null,this)">
-    <div class="ni-nova-ring">
-      <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
+<div id="page-resum" class="page">
+  <div class="range-switch">
+    <button class="range-btn active" id="range-capseta-weekend" onclick="setSummaryRange('weekend')">Cap de setmana</button>
+    <button class="range-btn" id="range-capseta-month" onclick="setSummaryRange('month')">Mensual</button>
+    <button class="range-btn" id="range-capseta-year" onclick="setSummaryRange('year')">Anual</button>
+  </div>
+  <div class="filter-card" style="padding:16px 16px 4px;margin-bottom:14px;border-radius:var(--r-lg)">
+    <div class="field-grid">
+      <div class="form-group"><label class="form-label">Data base</label><input id="summary-date" type="date" class="form-input" onchange="renderSummary()"></div>
+      <div class="form-group"><label class="form-label">Període</label><input id="summary-label" type="text" class="form-input" readonly></div>
     </div>
-    <span class="ni-label">Nova</span>
-  </button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-box green"><div class="sb-label">Reserves</div><div class="sb-val" id="st-reserves">0</div><div class="sb-sub">en el període</div></div>
+    <div class="stat-box earth"><div class="sb-label">Facturació</div><div class="sb-val" id="st-total">0 €</div><div class="sb-sub">total generat</div></div>
+    <div class="stat-box green"><div class="sb-label">Adults</div><div class="sb-val" id="st-adults">0</div><div class="sb-sub">sumats</div></div>
+    <div class="stat-box earth"><div class="sb-label">Nens</div><div class="sb-val" id="st-children">0</div><div class="sb-sub">sumats</div></div>
+  </div>
+  <div class="stats-list" id="summary-main-list"></div>
+  <div class="sum-card">
+    <div class="sum-head"><div><div class="sum-title">Ingressos per espai</div><div class="sum-sub">Distribució del període seleccionat</div></div></div>
+    <div class="stats-list" id="summary-space-list"></div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-head"><div><div class="sum-title">Indicadors destacats</div><div class="sum-sub">Punts clau del negoci</div></div></div>
+    <div class="stats-list" id="summary-highlight-list"></div>
+  </div>
+</div>
 
-  <!-- Pagaments -->
+<nav class="bnav">
+  <button class="ni active" id="nav-inici" onclick="showPage('inici',null,this)">
+    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg><span class="ni-label">Avui</span>
+  </button>
+  <button class="ni" id="nav-calendari" onclick="showPage('calendari',null,this)">
+    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="ni-label">Calendari</span>
+  </button>
+  <button class="ni-nova" id="nav-crear" onclick="showPage('crear',null,this)">
+    <div class="ni-nova-ring"><svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div><span class="ni-label">Nova</span>
+  </button>
   <button class="ni" id="nav-pagaments" onclick="showPage('pagaments',null,this)">
-    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="2" y="6" width="20" height="14" rx="3"/>
-      <path d="M2 10h20"/>
-      <path d="M6 15h4M15 15h3"/>
-    </svg>
-    <span class="ni-label">Pagaments</span>
+    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4M15 15h3"/></svg><span class="ni-label">Pagaments</span>
   </button>
-
-  <!-- Diners -->
   <button class="ni" id="nav-diners" onclick="showPage('diners',null,this)">
-    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M12 7v1.5M12 15.5V17"/>
-      <path d="M9.5 9.5a2.5 2.5 0 015 0c0 1.5-1.2 2.2-2.5 2.5-1.3.3-2.5 1-2.5 2.5a2.5 2.5 0 005 0"/>
-    </svg>
-    <span class="ni-label">Diners</span>
+    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9.5 10.5h4a2 2 0 010 4h-3a2 2 0 000 4h4"/></svg><span class="ni-label">Diners</span>
   </button>
-
+  <button class="ni" id="nav-resum" onclick="showPage('resum',null,this)">
+    <svg class="ni-svg" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M7 16V9"/><path d="M12 16V5"/><path d="M17 16v-3"/></svg><span class="ni-label">Resum</span>
+  </button>
 </nav>
 
-<!-- MODAL: DETALL RESERVA -->
-<div class="modal-ov" id="modalDetall" onclick="closeModal('modalDetall')">
+<div class="modal-ov" id="modalDetall" onclick="closeModal('modalDetall')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-sticky"><div class="modal-handle"></div></div><div id="modalDetallContent"></div></div></div>
+<div class="modal-ov" id="modalPagament" onclick="closeModal('modalPagament')">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-sticky"><div class="modal-handle"></div></div>
-    <div id="modalDetallContent"></div>
-  </div>
-</div>
-
-<!-- MODAL: NOVA RESERVA -->
-<div class="modal-ov" id="modalNova" onclick="closeModal('modalNova')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-sticky"><div class="modal-handle"></div><div class="modal-title">Nova Reserva</div></div>
+    <div class="modal-sticky"><div class="modal-handle"></div><div class="modal-title">Registrar pagament</div></div>
     <div style="margin-top:14px">
-      <div class="form-group"><label class="form-label">Nom del client</label><input id="m-nom" type="text" class="form-input" placeholder="Ex: Pere Garcia"></div>
-      <div class="form-group"><label class="form-label">Data</label><input id="m-data" type="date" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Nombre de persones</label><input id="m-pax" type="number" class="form-input" placeholder="Ex: 21" min="1"></div>
-      <div class="form-group">
-        <label class="form-label">Espai</label>
-        <div class="seg">
-          <button class="seg-btn" id="m-btn-casa"  onclick="selectTipusModal('Casa')">🏠 Casa</button>
-          <button class="seg-btn active" id="m-btn-bbq"   onclick="selectTipusModal('Barbacoa')">🔥 Barbacoa</button>
-          <button class="seg-btn" id="m-btn-espai" onclick="selectTipusModal('Espai nou')">✨ Espai nou</button>
+      <input type="hidden" id="pay-reserva-id">
+      <div class="field-grid">
+        <div class="form-group"><label class="form-label">Tipus de pagament</label>
+          <select id="pay-type" class="form-select" onchange="updatePaymentAmountSuggestion()">
+            <option value="deposit">Senyal</option>
+            <option value="remaining">Resta</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Data</label><input id="pay-date" type="date" class="form-input"></div>
+      </div>
+      <div class="field-grid">
+        <div class="form-group"><label class="form-label">Import</label><input id="pay-amount" type="number" step="0.01" min="0" class="form-input"></div>
+        <div class="form-group"><label class="form-label">Mètode</label>
+          <select id="pay-method" class="form-select"><option>Bizum</option><option>Transferència</option><option>Efectiu</option></select>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">Preu per persona</label><input id="m-preu" type="number" class="form-input" placeholder="25 €" min="0"></div>
-      <div class="form-group"><label class="form-label">Notes (opcional)</label><input id="m-notes" type="text" class="form-input" placeholder="Al·lèrgies, menú especial..."></div>
-      <button class="btn-primary" onclick="crearReservaModal()">Crear Reserva</button>
+      <div class="form-group"><label class="form-label">Rebut per</label>
+        <select id="pay-receiver" class="form-select"><option value="">Sense indicar</option><option>Jordi</option><option>Carla</option><option>Anna</option><option>Miquel</option></select>
+      </div>
+      <button class="btn-primary" onclick="savePaymentFromModal()">Guardar pagament</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════ DATA ═══════════════ */
-let reserves = JSON.parse(localStorage.getItem('reserves')||'[]');
-let bizums   = JSON.parse(localStorage.getItem('bizums')||'[]');
-let tipusSel = 'Barbacoa', tipusSelM = 'Barbacoa';
-let calData  = new Date(), calTriat = null;
-
+let reserves = JSON.parse(localStorage.getItem('reserves') || '[]');
+let bizumsLegacy = JSON.parse(localStorage.getItem('bizums') || '[]');
+let tipusSel = 'Barbacoa';
+let calData = new Date(), calTriat = null;
+let summaryRange = 'weekend';
 const MESOS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
-const DIES  = ['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
+const DIES = ['Dl','Dt','Dc','Dj','Dv','Ds','Dg'];
 const DIES_SETMANA = ['diumenge','dilluns','dimarts','dimecres','dijous','divendres','dissabte'];
 
-const save  = () => { localStorage.setItem('reserves',JSON.stringify(reserves)); localStorage.setItem('bizums',JSON.stringify(bizums)); };
-const genId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-const avui  = () => new Date().toISOString().slice(0,10);
-const fmt   = s => { const[y,m,d]=s.split('-'); return `${d}/${m}/${y}`; };
+function save(){
+  localStorage.setItem('reserves', JSON.stringify(reserves));
+}
+const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const avui = () => new Date().toISOString().slice(0,10);
+function fmt(s){ if(!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
+function euro(n){ return `${Number(n || 0).toFixed(Number.isInteger(Number(n || 0)) ? 0 : 2)} €`; }
+function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function parseDateLocal(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function sameDate(a,b){ return a===b; }
 
-/* ═══════════════ NAV ═══════════════ */
+function normalizeReserva(r){
+  const adults = Number(r.adults ?? r.pax ?? 0);
+  const children = Number(r.children ?? 0);
+  const adultPrice = Number(r.adultPrice ?? r.preu ?? 0);
+  const childPrice = Number(r.childPrice ?? 0);
+  const depositRequired = Number(r.depositRequired ?? 50);
+  if(!Array.isArray(r.payments)) r.payments = [];
+  if(r.payments.length === 0){
+    const legacyPaid = Number(r.pagat || 0);
+    if(legacyPaid > 0){
+      const depAmt = Math.min(depositRequired, legacyPaid);
+      r.payments.push({id:genId(), type:'deposit', amount:depAmt, date:r.data, receiver:r.depositReceiver || '', method:r.depositMethod || 'Bizum'});
+      const rest = legacyPaid - depAmt;
+      if(rest > 0) r.payments.push({id:genId(), type:'remaining', amount:rest, date:r.data, receiver:'', method:'Efectiu'});
+    }
+  }
+  if(Array.isArray(bizumsLegacy) && bizumsLegacy.length){
+    const match = bizumsLegacy.find(b => b.data === r.data && b.nom && r.nom && b.nom.toLowerCase() === r.nom.toLowerCase());
+    if(match && !r.payments.some(p => p.type==='deposit')){
+      r.payments.push({id:genId(), type:'deposit', amount:Number(match.import||0), date:match.data, receiver:'Jordi', method:'Bizum'});
+    }
+  }
+  r.telefon = r.telefon || '';
+  r.adults = adults;
+  r.children = children;
+  r.adultPrice = adultPrice;
+  r.childPrice = childPrice;
+  r.depositRequired = depositRequired;
+  r.notes = r.notes || '';
+  r.tipus = r.tipus || 'Barbacoa';
+  recalculateReserva(r);
+  return r;
+}
+
+function recalculateReserva(r){
+  r.totalAdults = Number(r.adults || 0) * Number(r.adultPrice || 0);
+  r.totalChildren = Number(r.children || 0) * Number(r.childPrice || 0);
+  r.total = Number(r.totalAdults) + Number(r.totalChildren);
+  r.totalPeople = Number(r.adults || 0) + Number(r.children || 0);
+  const payments = Array.isArray(r.payments) ? r.payments : [];
+  r.depositPaid = payments.filter(p => p.type === 'deposit').reduce((s,p)=>s+Number(p.amount||0),0);
+  r.remainingPaid = payments.filter(p => p.type === 'remaining').reduce((s,p)=>s+Number(p.amount||0),0);
+  r.totalPaid = r.depositPaid + r.remainingPaid;
+  r.pending = Math.max(0, r.total - r.totalPaid);
+  const deposit = payments.filter(p => p.type === 'deposit').sort((a,b)=>(a.date||'').localeCompare(b.date||''))[0];
+  r.depositDate = deposit ? deposit.date : '';
+  r.depositReceiver = deposit ? (deposit.receiver || '') : '';
+  r.depositMethod = deposit ? (deposit.method || '') : '';
+  if(r.totalPaid >= r.total && r.total > 0) r.estat = 'confirmat';
+  else if(r.depositPaid >= r.depositRequired && r.depositRequired > 0) r.estat = 'confirmat';
+  else r.estat = 'pendent';
+}
+
+reserves = reserves.map(normalizeReserva);
+save();
+
+function getTypeIcon(t){
+  if(t === 'Casa') return `<svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>`;
+  if(t === 'Espai nou') return `<svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M3 12h18"/></svg>`;
+  return `<svg viewBox="0 0 24 24"><path d="M5 19h14"/><path d="M7 19V9h10v10"/><path d="M9 9V6h6v3"/></svg>`;
+}
+
 function showPage(name, tabEl, navEl){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  /* marca els .ni i els .ni-nova */
-  document.querySelectorAll('.ni, .ni-nova').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni, .ni-nova').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   const nav = navEl || document.getElementById('nav-'+name);
   if(nav) nav.classList.add('active');
-  if(name==='inici')     renderInici();
+  if(name==='inici') renderInici();
   if(name==='calendari') renderCal();
   if(name==='pagaments') renderPagaments();
-  if(name==='diners'){ document.getElementById('diners-data').value=avui(); calcularDiners(); renderBizums(); }
+  if(name==='diners'){ document.getElementById('diners-data').value ||= avui(); renderDinersPage(); }
+  if(name==='resum'){ document.getElementById('summary-date').value ||= avui(); renderSummary(); }
 }
 
-/* ═══════════════ AVUI ═══════════════ */
 function renderInici(){
-  const ts=avui(), d=new Date();
-  document.getElementById('headerDate').textContent=`${DIES_SETMANA[d.getDay()]} ${d.getDate()} de ${MESOS[d.getMonth()].toLowerCase()}`;
-  const hoy=reserves.filter(r=>r.data===ts);
-  let total=0,cobrat=0;
-  hoy.forEach(r=>{ total+=r.pax*r.preu; cobrat+=(r.pagat||0); });
-  const pend=total-cobrat;
-  document.getElementById('totalDia').textContent=total+' €';
-  document.getElementById('cobratDia').textContent=cobrat+' €';
-  document.getElementById('pendentDia').textContent=pend+' €';
-  document.getElementById('numReservesDia').textContent=hoy.length+' reserva'+(hoy.length!==1?'s':'');
-  document.getElementById('cobratChip').textContent=cobrat+' € cobrat';
-  const cont=document.getElementById('reservesAvui');
-  cont.innerHTML=hoy.length ? hoy.map(r=>rcHTML(r)).join('') : `<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">Sense reserves per avui</div></div>`;
+  const ts = avui(), d = new Date();
+  document.getElementById('headerDate').textContent = `${DIES_SETMANA[d.getDay()]} ${d.getDate()} de ${MESOS[d.getMonth()].toLowerCase()}`;
+  const hoy = reserves.filter(r => r.data === ts);
+  let total = 0, cobrat = 0;
+  hoy.forEach(r => { recalculateReserva(r); total += r.total; cobrat += r.totalPaid; });
+  const pend = total - cobrat;
+  document.getElementById('totalDia').textContent = euro(total);
+  document.getElementById('cobratDia').textContent = euro(cobrat);
+  document.getElementById('pendentDia').textContent = euro(pend);
+  document.getElementById('numReservesDia').textContent = `${hoy.length} reserva${hoy.length!==1?'s':''}`;
+  document.getElementById('cobratChip').textContent = `${euro(cobrat)} cobrat`;
+  const cont = document.getElementById('reservesAvui');
+  cont.innerHTML = hoy.length ? hoy.map(r => rcHTML(r)).join('') : `<div class="empty"><div class="empty-txt">Sense reserves per avui</div></div>`;
 }
 
 function rcHTML(r){
-  const total=r.pax*r.preu, pag=r.pagat||0, pct=total>0?Math.min(100,Math.round(pag/total*100)):0;
-  const st=r.estat==='confirmat'?'confirmed':'pending';
-  const ico = r.tipus==='Barbacoa' ? '🔥' : r.tipus==='Espai nou' ? '✨' : '🏠';
-  const tc  = r.tipus==='Barbacoa' ? 'bbq' : r.tipus==='Espai nou' ? 'espai' : 'casa';
+  recalculateReserva(r);
+  const pct = r.total > 0 ? Math.min(100, Math.round(r.totalPaid / r.total * 100)) : 0;
+  const st = r.estat === 'confirmat' ? 'confirmed' : 'pending';
+  const tc = r.tipus === 'Barbacoa' ? 'bbq' : r.tipus === 'Espai nou' ? 'espai' : 'casa';
+  const signalText = r.depositPaid >= r.depositRequired ? 'Senyal pagada' : 'Senyal pendent';
   return `<div class="rc ${st}" onclick="openDetall('${r.id}')">
     <div class="rc-top">
-      <div class="rc-badge ${tc}">${ico}</div>
+      <div class="rc-badge ${tc}">${getTypeIcon(r.tipus)}</div>
       <div class="rc-main">
         <div class="rc-name">${r.nom}</div>
-        <div class="rc-meta">${fmt(r.data)} · ${r.preu} €/pax</div>
+        <div class="rc-meta">${fmt(r.data)} · ${r.telefon || 'sense telèfon'}</div>
       </div>
       <div class="rc-price-col">
-        <div class="rc-price">${total} €</div>
-        <div class="rc-price-sub">${pag>0?pag+'€ cobrat':'sense pagament'}</div>
+        <div class="rc-price">${euro(r.total)}</div>
+        <div class="rc-price-sub">${euro(r.totalPaid)} cobrat</div>
       </div>
     </div>
     <div class="rc-pills">
-      <span class="pill pax">👥 ${r.pax} persones</span>
-      <span class="pill tipo">${ico} ${r.tipus}</span>
-      <span class="pill ${st==='confirmed'?'ok':'wait'}">${st==='confirmed'?'✅ Confirmat':'⏳ Pendent'}</span>
+      <span class="pill pax">${r.totalPeople} persones</span>
+      <span class="pill tipo">${r.tipus}</span>
+      <span class="pill info">${signalText}</span>
+      <span class="pill ${st==='confirmed'?'ok':'wait'}">${st==='confirmed'?'Confirmada':'Pendent'}</span>
     </div>
     <div class="rc-bar"><div class="rc-bar-fill" style="width:${pct}%"></div></div>
   </div>`;
 }
 
-/* ═══════════════ CALENDARI ═══════════════ */
 function renderCal(){
-  const y=calData.getFullYear(), m=calData.getMonth();
-  document.getElementById('calMonth').textContent=`${MESOS[m]} ${y}`;
-  document.getElementById('calDows').innerHTML=DIES.map(d=>`<div class="cal-dow">${d}</div>`).join('');
-  const fd=new Date(y,m,1).getDay(), off=fd===0?6:fd-1;
-  const dim=new Date(y,m+1,0).getDate(), dip=new Date(y,m,0).getDate();
-  const ts=avui(), cells=Math.ceil((off+dim)/7)*7;
+  const y = calData.getFullYear(), m = calData.getMonth();
+  document.getElementById('calMonth').textContent = `${MESOS[m]} ${y}`;
+  document.getElementById('calDows').innerHTML = DIES.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  const fd = new Date(y,m,1).getDay(), off = fd===0?6:fd-1;
+  const dim = new Date(y,m+1,0).getDate(), dip = new Date(y,m,0).getDate();
+  const ts = avui();
+  const cells = Math.ceil((off+dim)/7)*7;
   let html='';
   for(let i=0;i<cells;i++){
-    let num,ds,other=false;
-    if(i<off){ num=dip-off+i+1; other=true; }
-    else if(i>=off+dim){ num=i-off-dim+1; other=true; }
-    else{ num=i-off+1; }
-    const mm=String(m+1).padStart(2,'0'), dd=String(num).padStart(2,'0');
-    ds=other?'':`${y}-${mm}-${dd}`;
-    const dr=ds?reserves.filter(r=>r.data===ds):[];
-    const hasPend=dr.some(r=>r.estat==='pendent');
-    const isT=ds===ts&&!other, isCh=calTriat===ds&&!other;
+    let num, ds='', other=false;
+    if(i<off){ num = dip-off+i+1; other=true; }
+    else if(i>=off+dim){ num = i-off-dim+1; other=true; }
+    else{ num = i-off+1; }
+    const mm = String(m+1).padStart(2,'0'), dd = String(num).padStart(2,'0');
+    ds = other ? '' : `${y}-${mm}-${dd}`;
+    const dr = ds ? reserves.filter(r => r.data===ds) : [];
+    const hasPend = dr.some(r => r.estat==='pendent');
+    const isT = ds===ts && !other, isCh = calTriat===ds && !other;
     let cls='cal-cell';
     if(other) cls+=' other';
-    if(isT)   cls+=' today';
-    if(isCh&&!isT) cls+=' chosen';
-    if(dr.length&&!other) cls+=hasPend?' has-earth':' has-green';
-    const dot=dr.length&&!other?'<div class="cal-dot"></div>':'';
-    const click=other?'':`onclick="selectCalDay('${ds}')"`;
-    html+=`<div class="${cls}" ${click}><div class="cal-num">${num}</div>${dot}</div>`;
+    if(isT) cls+=' today';
+    if(isCh && !isT) cls+=' chosen';
+    if(dr.length && !other) cls += hasPend ? ' has-earth' : ' has-green';
+    const dot = dr.length && !other ? '<div class="cal-dot"></div>' : '';
+    const click = other ? '' : `onclick="selectCalDay('${ds}')"`;
+    html += `<div class="${cls}" ${click}><div class="cal-num">${num}</div>${dot}</div>`;
   }
-  document.getElementById('calGrid').innerHTML=html;
+  document.getElementById('calGrid').innerHTML = html;
   renderCalDetall();
 }
 function changeMonth(d){ calData.setMonth(calData.getMonth()+d); renderCal(); }
-function selectCalDay(ds){ calTriat=ds; renderCal(); }
+function selectCalDay(ds){ calTriat = ds; renderCal(); }
 function renderCalDetall(){
-  const cont=document.getElementById('calDetall');
-  if(!calTriat){ cont.innerHTML=`<div style="color:var(--ink4);font-size:13px;text-align:center;padding:14px;font-weight:500">Toca un dia per veure les seves reserves</div>`; return; }
-  const dr=reserves.filter(r=>r.data===calTriat);
-  cont.innerHTML=`<div class="cal-detail-hdr">📅 ${fmt(calTriat)}</div>`+(dr.length?dr.map(r=>rcHTML(r)).join(''):`<div style="color:var(--ink4);font-size:13px;font-weight:500;padding:6px 2px">Sense reserves aquest dia</div>`);
+  const cont = document.getElementById('calDetall');
+  if(!calTriat){ cont.innerHTML = `<div style="color:var(--ink4);font-size:13px;text-align:center;padding:14px;font-weight:500">Toca un dia per veure les reserves</div>`; return; }
+  const dr = reserves.filter(r => r.data===calTriat);
+  cont.innerHTML = `<div class="cal-detail-hdr">${fmt(calTriat)}</div>` + (dr.length ? dr.map(r => rcHTML(r)).join('') : `<div style="color:var(--ink4);font-size:13px;font-weight:500;padding:6px 2px">Sense reserves aquest dia</div>`);
 }
 
-/* ═══════════════ CREAR ═══════════════ */
 function selectTipus(t){
   tipusSel=t;
   document.getElementById('btn-bbq').classList.toggle('active',t==='Barbacoa');
   document.getElementById('btn-casa').classList.toggle('active',t==='Casa');
   document.getElementById('btn-espai').classList.toggle('active',t==='Espai nou');
 }
-function selectTipusModal(t){
-  tipusSelM=t;
-  document.getElementById('m-btn-bbq').classList.toggle('active',t==='Barbacoa');
-  document.getElementById('m-btn-casa').classList.toggle('active',t==='Casa');
-  document.getElementById('m-btn-espai').classList.toggle('active',t==='Espai nou');
+function getCreateValues(prefix='f'){
+  const adults = Number(document.getElementById(`${prefix}-adults`).value || 0);
+  const adultPrice = Number(document.getElementById(`${prefix}-preu-adult`).value || 0);
+  const children = Number(document.getElementById(`${prefix}-children`).value || 0);
+  const childPrice = Number(document.getElementById(`${prefix}-preu-nen`).value || 0);
+  return {adults, adultPrice, children, childPrice, totalAdults: adults*adultPrice, totalChildren: children*childPrice, total: adults*adultPrice + children*childPrice};
 }
-function _mkRes(n,d,p,pr,tipus,nt){ return {id:genId(),nom:n,data:d,pax:parseInt(p),preu:parseFloat(pr),tipus,estat:'pendent',pagat:0,notes:nt}; }
-
-function crearReserva(){
-  const n=document.getElementById('f-nom').value.trim(), d=document.getElementById('f-data').value,
-        p=document.getElementById('f-pax').value, pr=document.getElementById('f-preu').value,
-        nt=document.getElementById('f-notes').value.trim();
-  if(!n||!d||!p||!pr){ toast('⚠️ Omple tots els camps'); return; }
-  reserves.push(_mkRes(n,d,p,pr,tipusSel,nt)); save();
-  ['f-nom','f-pax','f-preu','f-notes'].forEach(id=>document.getElementById(id).value='');
+function updateCreateSummary(){
+  const v = getCreateValues('f');
+  document.getElementById('sumAdults').textContent = euro(v.totalAdults);
+  document.getElementById('sumChildren').textContent = euro(v.totalChildren);
+  document.getElementById('sumTotal').textContent = euro(v.total);
+}
+function buildReservaFromForm(){
+  const nom = document.getElementById('f-nom').value.trim();
+  const telefon = document.getElementById('f-telefon').value.trim();
+  const data = document.getElementById('f-data').value;
+  const notes = document.getElementById('f-notes').value.trim();
+  const {adults, adultPrice, children, childPrice, total} = getCreateValues('f');
+  if(!nom || !data || total <= 0){ toast('Omple les dades bàsiques de la reserva'); return null; }
+  const depositRequired = Number(document.getElementById('f-senyal').value || 50);
+  const depositAmount = Number(document.getElementById('f-senyal-pagada').value || 0);
+  const depositDate = document.getElementById('f-bizum-data').value || '';
+  const depositReceiver = document.getElementById('f-receptor').value || '';
+  const depositMethod = document.getElementById('f-metode').value || 'Bizum';
+  const reserva = {
+    id: genId(), nom, telefon, data, tipus: tipusSel, adults, adultPrice, children, childPrice,
+    depositRequired, payments: [], notes
+  };
+  if(depositAmount > 0){
+    reserva.payments.push({id:genId(), type:'deposit', amount:depositAmount, date:depositDate || data, receiver:depositReceiver, method:depositMethod});
+  }
+  recalculateReserva(reserva);
+  return reserva;
+}
+function clearCreateForm(){
+  ['f-nom','f-telefon','f-notes'].forEach(id=>document.getElementById(id).value='');
+  ['f-adults','f-preu-adult','f-children','f-preu-nen','f-senyal-pagada'].forEach((id,i)=>document.getElementById(id).value = i===0 || id==='f-children' ? '0' : '');
+  document.getElementById('f-senyal').value='50';
   document.getElementById('f-data').value=avui();
-  toast('✅ Reserva creada');
-  showPage('inici',null,document.getElementById('nav-inici'));
+  document.getElementById('f-bizum-data').value='';
+  document.getElementById('f-receptor').value='';
+  document.getElementById('f-metode').value='Bizum';
+  tipusSel='Barbacoa'; selectTipus('Barbacoa'); updateCreateSummary();
 }
-function crearReservaModal(){
-  const n=document.getElementById('m-nom').value.trim(), d=document.getElementById('m-data').value,
-        p=document.getElementById('m-pax').value, pr=document.getElementById('m-preu').value,
-        nt=document.getElementById('m-notes').value.trim();
-  if(!n||!d||!p||!pr){ toast('⚠️ Omple tots els camps'); return; }
-  reserves.push(_mkRes(n,d,p,pr,tipusSelM,nt)); save();
-  closeModal('modalNova'); toast('✅ Reserva creada'); renderInici();
+function crearReserva(){
+  const r = buildReservaFromForm();
+  if(!r) return;
+  reserves.push(r); save(); clearCreateForm(); toast('Reserva creada'); showPage('inici',null,document.getElementById('nav-inici'));
 }
 
-/* ═══════════════ PAGAMENTS ═══════════════ */
 function renderPagaments(){
-  const cont=document.getElementById('llistaPagaments');
-  if(!reserves.length){ cont.innerHTML=`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">Sense reserves encara</div></div>`; return; }
-  const sorted=[...reserves].sort((a,b)=>a.data.localeCompare(b.data));
-  cont.innerHTML=`<div class="pagos-wrap">${sorted.map(r=>{
-    const total=r.pax*r.preu, pag=r.pagat||0, pend=total-pag;
-    const pct=total>0?Math.min(100,Math.round(pag/total*100)):0;
-    const cls=r.estat==='confirmat'?'paid':'partial';
-    const ico=r.estat==='confirmat'?'✅':'⏳';
+  const cont = document.getElementById('llistaPagaments');
+  if(!reserves.length){ cont.innerHTML = `<div class="empty"><div class="empty-txt">Sense reserves encara</div></div>`; return; }
+  const sorted = [...reserves].sort((a,b)=>a.data.localeCompare(b.data));
+  cont.innerHTML = `<div class="pagos-wrap">${sorted.map(r=>{
+    recalculateReserva(r);
+    const pct = r.total>0 ? Math.min(100, Math.round(r.totalPaid/r.total*100)) : 0;
+    const sub = `${r.totalPeople} persones · ${r.tipus} · ${fmt(r.data)}`;
+    const depositInfo = r.depositPaid>0 ? `senyal ${euro(r.depositPaid)}${r.depositReceiver ? ' · ' + r.depositReceiver : ''}` : 'senyal pendent';
     return `<div class="pago-row" onclick="openDetall('${r.id}')">
-      <div class="pago-av ${cls}">${ico}</div>
+      <div class="pago-av">${getTypeIcon(r.tipus)}</div>
       <div class="pago-info">
         <div class="pago-name">${r.nom}</div>
-        <div class="pago-sub">👥 ${r.pax} pax · ${r.tipus} · ${fmt(r.data)}</div>
+        <div class="pago-sub">${sub}</div>
+        <div class="pago-sub">${depositInfo}</div>
         <div class="pago-prog"><div class="pago-prog-fill" style="width:${pct}%"></div></div>
       </div>
       <div class="pago-right">
-        <div class="pago-paid">${pag} €</div>
-        ${pend>0?`<div class="pago-pend">−${pend} €</div>`:`<div class="pago-done">✓ Pagat</div>`}
+        <div class="pago-paid">${euro(r.totalPaid)}</div>
+        ${r.pending>0 ? `<div class="pago-pend">${euro(r.pending)} pendent</div>` : `<div class="pago-done">Pagat</div>`}
       </div>
     </div>`;
   }).join('')}</div>`;
 }
 
-/* ═══════════════ DETALL ═══════════════ */
 function openDetall(id){
-  const r=reserves.find(x=>x.id===id); if(!r) return;
-  const total=r.pax*r.preu, pag=r.pagat||0, pend=total-pag;
-  const pct=total>0?Math.min(100,Math.round(pag/total*100)):0;
-  const sc=r.estat==='confirmat'?'confirmed':'pending';
-  document.getElementById('modalDetallContent').innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+  const r = reserves.find(x => x.id === id); if(!r) return; recalculateReserva(r);
+  const pct = r.total>0 ? Math.min(100,Math.round(r.totalPaid/r.total*100)) : 0;
+  const sc = r.estat==='confirmat'?'confirmed':'pending';
+  const paymentsHtml = r.payments.length ? r.payments.map(p => `<div class="det-row"><span class="dk">${p.type==='deposit'?'Senyal':'Resta'} · ${fmt(p.date)}</span><span class="dv">${euro(p.amount)} · ${p.receiver || 'sense receptor'}</span></div>`).join('') : `<div class="det-row"><span class="dk">Pagaments</span><span class="dv">Sense registres</span></div>`;
+  document.getElementById('modalDetallContent').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px">
       <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;color:var(--ink)">${r.nom}</div>
-      <span class="status-pill ${sc}">${r.estat==='confirmat'?'✅ Confirmat':'⏳ Pendent'}</span>
+      <span class="status-pill ${sc}">${r.estat==='confirmat'?'Confirmada':'Pendent'}</span>
     </div>
     <div class="prog-wrap">
       <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
-      <div class="prog-labels">
-        <span class="prog-pct">${pct}% pagat</span>
-        <span class="prog-rest">${pend>0?pend+'€ pendent':'Completat'}</span>
-      </div>
+      <div class="prog-labels"><span class="prog-pct">${pct}% cobrat</span><span class="prog-rest">${r.pending>0 ? euro(r.pending) + ' pendent' : 'Completat'}</span></div>
     </div>
     <div class="det-group">
-      <div class="det-row"><span class="dk">📅 Data</span><span class="dv">${fmt(r.data)}</span></div>
-      <div class="det-row"><span class="dk">👥 Persones</span><span class="dv">${r.pax} persones</span></div>
-      <div class="det-row"><span class="dk">🏡 Espai</span><span class="dv">${r.tipus==='Barbacoa'?'🔥 Barbacoa':r.tipus==='Espai nou'?'✨ Espai nou':'🏠 Casa'}</span></div>
-      <div class="det-row"><span class="dk">💶 Preu/pax</span><span class="dv">${r.preu} €</span></div>
-      <div class="det-row"><span class="dk">💰 Total</span><span class="dv" style="color:var(--green);font-size:16px">${total} €</span></div>
-      <div class="det-row"><span class="dk">✅ Pagat</span><span class="dv" style="color:var(--green)">${pag} €</span></div>
-      ${r.notes?`<div class="det-row"><span class="dk">📝 Notes</span><span class="dv" style="font-size:13px;font-weight:500;color:var(--ink2)">${r.notes}</span></div>`:''}
+      <div class="det-row"><span class="dk">Data</span><span class="dv">${fmt(r.data)}</span></div>
+      <div class="det-row"><span class="dk">Telèfon</span><span class="dv">${r.telefon || '—'}</span></div>
+      <div class="det-row"><span class="dk">Espai</span><span class="dv">${r.tipus}</span></div>
+      <div class="det-row"><span class="dk">Adults</span><span class="dv">${r.adults} · ${euro(r.adultPrice)}</span></div>
+      <div class="det-row"><span class="dk">Nens</span><span class="dv">${r.children} · ${euro(r.childPrice)}</span></div>
+      <div class="det-row"><span class="dk">Total reserva</span><span class="dv" style="color:var(--green)">${euro(r.total)}</span></div>
+      <div class="det-row"><span class="dk">Senyal requerida</span><span class="dv">${euro(r.depositRequired)}</span></div>
+      <div class="det-row"><span class="dk">Senyal pagada</span><span class="dv">${euro(r.depositPaid)}</span></div>
+      <div class="det-row"><span class="dk">Rebuda per</span><span class="dv">${r.depositReceiver || '—'}</span></div>
+      <div class="det-row"><span class="dk">Mètode</span><span class="dv">${r.depositMethod || '—'}</span></div>
+      <div class="det-row"><span class="dk">Pagat total</span><span class="dv">${euro(r.totalPaid)}</span></div>
+      <div class="det-row"><span class="dk">Pendent</span><span class="dv">${euro(r.pending)}</span></div>
+      ${r.notes ? `<div class="det-row"><span class="dk">Notes</span><span class="dv" style="text-align:left;max-width:180px">${r.notes}</span></div>` : ''}
     </div>
+    <div class="det-group">${paymentsHtml}</div>
     <div>
-      ${pend>0&&pag===0?`<button class="act-btn senal" onclick="registrarPagament('${r.id}','senal')">💶 Registrar senyal de 50 €</button>`:''}
-      ${pend>0?`<button class="act-btn full" onclick="registrarPagament('${r.id}','resta')">✅ Pagar la resta · ${pend} €</button>`:''}
-      ${r.estat!=='confirmat'?`<button class="act-btn confirm" onclick="confirmarReserva('${r.id}')">🟢 Marcar com a confirmada</button>`:''}
+      <button class="act-btn senal" onclick="openPaymentModal('${r.id}','deposit')">Registrar senyal</button>
+      <button class="act-btn full" onclick="openPaymentModal('${r.id}','remaining')">Registrar resta</button>
     </div>
-    <div style="margin-top:8px;text-align:center">
-      <button class="btn-danger" onclick="eliminarReserva('${r.id}')">Eliminar reserva</button>
-    </div>`;
+    <div style="margin-top:8px;text-align:center"><button class="btn-danger" onclick="eliminarReserva('${r.id}')">Eliminar reserva</button></div>`;
   openModal('modalDetall');
 }
-function registrarPagament(id,tipus){
-  const r=reserves.find(x=>x.id===id); if(!r) return;
-  const total=r.pax*r.preu;
-  if(tipus==='senal'){ r.pagat=(r.pagat||0)+50; toast('💶 Senyal de 50 € registrada'); }
-  else{ const pend=total-(r.pagat||0); r.pagat=total; toast(`✅ ${pend} € registrat`); }
-  if((r.pagat||0)>=total) r.estat='confirmat';
-  save(); openDetall(id); renderInici(); renderPagaments();
-}
-function confirmarReserva(id){ const r=reserves.find(x=>x.id===id); if(r){ r.estat='confirmat'; save(); openDetall(id); renderInici(); renderPagaments(); toast('🟢 Confirmada'); } }
-function eliminarReserva(id){ if(!confirm('Eliminar aquesta reserva?')) return; reserves=reserves.filter(x=>x.id!==id); save(); closeModal('modalDetall'); renderInici(); renderPagaments(); toast('🗑 Eliminada'); }
 
-/* ═══════════════ DINERS ═══════════════ */
-function calcularDiners(){
-  const data=document.getElementById('diners-data').value; if(!data) return;
-  const dr=reserves.filter(r=>r.data===data);
-  const totalDia=dr.reduce((s,r)=>s+r.pax*r.preu,0);
-  const meitat=totalDia/2;
-  const bDia=bizums.filter(b=>b.data===data);
-  const totalBiz=bDia.reduce((s,b)=>s+b.import,0);
-  const nosaltres=meitat-totalBiz, ells=meitat;
-  if(!dr.length){ document.getElementById('diners-resultat').innerHTML=`<div class="empty"><div class="empty-icon">🌿</div><div class="empty-txt">Sense reserves aquest dia</div></div>`; return; }
-  document.getElementById('diners-resultat').innerHTML=`
-    <div class="d-hero">
-      <div class="dh-eye">Total del dia · ${fmt(data)}</div>
-      <div class="dh-val">${totalDia} €</div>
-      <div class="dh-foot">${dr.length} reserva${dr.length!==1?'s':''} · dividit entre 2</div>
-    </div>
+function openPaymentModal(id, type){
+  const r = reserves.find(x => x.id === id); if(!r) return; recalculateReserva(r);
+  document.getElementById('pay-reserva-id').value = id;
+  document.getElementById('pay-type').value = type;
+  document.getElementById('pay-date').value = avui();
+  document.getElementById('pay-method').value = type === 'deposit' ? 'Bizum' : 'Efectiu';
+  document.getElementById('pay-receiver').value = '';
+  updatePaymentAmountSuggestion();
+  openModal('modalPagament');
+}
+function updatePaymentAmountSuggestion(){
+  const id = document.getElementById('pay-reserva-id').value;
+  const type = document.getElementById('pay-type').value;
+  const r = reserves.find(x => x.id === id); if(!r) return;
+  recalculateReserva(r);
+  document.getElementById('pay-amount').value = type === 'deposit' ? Math.max(0, r.depositRequired - r.depositPaid) : Math.max(0, r.pending);
+}
+function savePaymentFromModal(){
+  const id = document.getElementById('pay-reserva-id').value;
+  const type = document.getElementById('pay-type').value;
+  const amount = Number(document.getElementById('pay-amount').value || 0);
+  const date = document.getElementById('pay-date').value || avui();
+  const method = document.getElementById('pay-method').value || 'Bizum';
+  const receiver = document.getElementById('pay-receiver').value || '';
+  const r = reserves.find(x => x.id === id); if(!r || amount <= 0){ toast('Revisa l\'import del pagament'); return; }
+  r.payments.push({id:genId(), type, amount, date, method, receiver});
+  recalculateReserva(r); save(); closeModal('modalPagament'); closeModal('modalDetall'); openDetall(id); renderInici(); renderPagaments(); if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage(); if(document.getElementById('page-resum').classList.contains('active')) renderSummary(); toast('Pagament guardat');
+}
+function eliminarReserva(id){ if(!confirm('Eliminar aquesta reserva?')) return; reserves = reserves.filter(x => x.id !== id); save(); closeModal('modalDetall'); renderInici(); renderPagaments(); if(document.getElementById('page-diners').classList.contains('active')) renderDinersPage(); if(document.getElementById('page-resum').classList.contains('active')) renderSummary(); toast('Reserva eliminada'); }
+
+function renderDinersPage(){
+  const data = document.getElementById('diners-data').value; if(!data) return;
+  const dr = reserves.filter(r => r.data === data);
+  let totalDia = 0, totalSignals = 0, totalResta = 0, totalBizumsJordi = 0;
+  dr.forEach(r => {
+    recalculateReserva(r);
+    totalDia += r.total;
+    totalSignals += r.depositPaid;
+    totalResta += r.remainingPaid;
+    totalBizumsJordi += r.payments.filter(p => p.type==='deposit' && (p.receiver==='Jordi' || p.receiver==='Carla')).reduce((s,p)=>s+Number(p.amount||0),0);
+  });
+  const meitat = totalDia / 2;
+  const nosaltres = meitat - totalBizumsJordi;
+  const ells = meitat;
+  const box = document.getElementById('diners-resultat');
+  if(!dr.length){ box.innerHTML = `<div class="empty"><div class="empty-txt">Sense reserves aquest dia</div></div>`; renderBizums(); return; }
+  box.innerHTML = `
+    <div class="d-hero"><div class="dh-eye">Total del dia · ${fmt(data)}</div><div class="dh-val">${euro(totalDia)}</div><div class="dh-foot">${dr.length} reserva${dr.length!==1?'s':''} · repartit entre 2</div></div>
     <div class="diners-grid-4">
-      <div class="dcard meitat">
-        <div class="dc-eye">Meitat</div>
-        <div class="dc-val">${meitat.toFixed(2)} €</div>
-        <div class="dc-note">50% del total</div>
-      </div>
-      <div class="dcard total">
-        <div class="dc-eye">Bizums rebuts</div>
-        <div class="dc-val">− ${totalBiz} €</div>
-        <div class="dc-note">ja cobrat per Bizum</div>
-      </div>
-      <div class="dcard nos">
-        <div class="dc-eye">Jordi i Carla</div>
-        <div class="dc-val">${nosaltres.toFixed(2)} €</div>
-        <div class="dc-note">meitat − bizums</div>
-      </div>
-      <div class="dcard ells">
-        <div class="dc-eye">Anna i Miquel</div>
-        <div class="dc-val">${ells.toFixed(2)} €</div>
-        <div class="dc-note">50% íntegre</div>
-      </div>
+      <div class="dcard meitat"><div class="dc-eye">Meitat</div><div class="dc-val">${euro(meitat)}</div><div class="dc-note">50% del total</div></div>
+      <div class="dcard total"><div class="dc-eye">Senyals</div><div class="dc-val">${euro(totalSignals)}</div><div class="dc-note">pagades abans</div></div>
+      <div class="dcard nos"><div class="dc-eye">Jordi i Carla</div><div class="dc-val">${euro(nosaltres)}</div><div class="dc-note">meitat menys senyals rebudes</div></div>
+      <div class="dcard ells"><div class="dc-eye">Anna i Miquel</div><div class="dc-val">${euro(ells)}</div><div class="dc-note">meitat íntegra</div></div>
     </div>
     <div class="calc-block">
-      <div class="calc-line"><span class="cl-k">💰 Total del dia</span><span class="cl-v">${totalDia} €</span></div>
-      <div class="calc-line"><span class="cl-k">➗ Dividit entre 2</span><span class="cl-v green">${meitat.toFixed(2)} €</span></div>
-      <div class="calc-line"><span class="cl-k">📱 Bizums rebuts</span><span class="cl-v earth">− ${totalBiz} €</span></div>
-      <div class="calc-line highlight"><span class="cl-k" style="font-weight:700;color:var(--ink)">✅ Jordi i Carla</span><span class="cl-v strong">${nosaltres.toFixed(2)} €</span></div>
+      <div class="calc-line"><span class="cl-k">Total del dia</span><span class="cl-v">${euro(totalDia)}</span></div>
+      <div class="calc-line"><span class="cl-k">Cobrat en senyals</span><span class="cl-v green">${euro(totalSignals)}</span></div>
+      <div class="calc-line"><span class="cl-k">Cobrat el mateix dia</span><span class="cl-v green">${euro(totalResta)}</span></div>
+      <div class="calc-line"><span class="cl-k">Senyals de Jordi i Carla</span><span class="cl-v earth">${euro(totalBizumsJordi)}</span></div>
+      <div class="calc-line highlight"><span class="cl-k" style="font-weight:700;color:var(--ink)">Jordi i Carla</span><span class="cl-v strong">${euro(nosaltres)}</span></div>
+      <div class="calc-line"><span class="cl-k">Anna i Miquel</span><span class="cl-v earth">${euro(ells)}</span></div>
     </div>`;
+  renderBizums();
 }
-function addBizum(){
-  const nom=document.getElementById('bizum-nom').value.trim();
-  const imp=parseFloat(document.getElementById('bizum-import').value);
-  const data=document.getElementById('diners-data').value;
-  if(!nom||!imp||!data){ toast("⚠️ Omple el nom i l'import"); return; }
-  bizums.push({id:genId(),nom,import:imp,data}); save();
-  document.getElementById('bizum-nom').value='';
-  document.getElementById('bizum-import').value='';
-  renderBizums(); calcularDiners(); toast(`📱 Bizum de ${nom} afegit`);
-}
-function deleteBizum(id){ bizums=bizums.filter(b=>b.id!==id); save(); renderBizums(); calcularDiners(); }
 function renderBizums(){
-  const data=document.getElementById('diners-data').value;
-  const list=document.getElementById('bizum-llista');
-  const f=bizums.filter(b=>b.data===data);
-  list.innerHTML=f.length ? f.map(b=>`
+  const data = document.getElementById('diners-data').value;
+  const list = document.getElementById('bizum-llista');
+  const deposits = reserves.filter(r => r.data === data).flatMap(r => (r.payments || []).filter(p => p.type==='deposit').map(p => ({...p, reservaNom:r.nom, reservaId:r.id})));
+  list.innerHTML = deposits.length ? deposits.map(p => `
     <div class="biz-item">
-      <div class="biz-av">📱</div>
-      <div class="biz-name">${b.nom}</div>
-      <div class="biz-amt">${b.import} €</div>
-      <button class="biz-del" onclick="deleteBizum('${b.id}')">✕</button>
-    </div>`).join('') : `<div style="color:var(--ink4);font-size:13px;padding:6px 0 10px;font-weight:500">Sense bizums aquest dia</div>`;
+      <div class="biz-av"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M3 12h18"/></svg></div>
+      <div class="biz-meta"><div class="biz-name">${p.reservaNom}</div><div class="biz-sub">${fmt(p.date)} · ${p.receiver || 'sense receptor'} · ${p.method || 'sense mètode'}</div></div>
+      <div class="biz-amt">${euro(p.amount)}</div>
+    </div>`).join('') : `<div style="color:var(--ink4);font-size:13px;padding:6px 0 10px;font-weight:500">Sense senyals registrades aquest dia</div>`;
 }
 
-/* ═══════════════ MODALS ═══════════════ */
+function setSummaryRange(range){
+  summaryRange = range;
+  ['weekend','month','year'].forEach(r => document.getElementById('range-capseta-'+r).classList.toggle('active', r===range));
+  renderSummary();
+}
+function getSummaryDates(base){
+  const d = parseDateLocal(base || avui());
+  if(summaryRange === 'month') return {start:new Date(d.getFullYear(), d.getMonth(), 1), end:new Date(d.getFullYear(), d.getMonth()+1, 0)};
+  if(summaryRange === 'year') return {start:new Date(d.getFullYear(), 0, 1), end:new Date(d.getFullYear(), 11, 31)};
+  const day = d.getDay();
+  const diffToFriday = day === 0 ? -2 : 5 - day;
+  const start = new Date(d); start.setDate(d.getDate() + diffToFriday);
+  const end = new Date(start); end.setDate(start.getDate() + 2);
+  return {start, end};
+}
+function formatRangeLabel(start,end){
+  if(summaryRange==='month') return `${MESOS[start.getMonth()]} ${start.getFullYear()}`;
+  if(summaryRange==='year') return `${start.getFullYear()}`;
+  return `${start.getDate()}/${start.getMonth()+1} - ${end.getDate()}/${end.getMonth()+1}`;
+}
+function inRange(dateString,start,end){ const d=parseDateLocal(dateString); return startOfDay(d)>=startOfDay(start) && startOfDay(d)<=startOfDay(end); }
+function renderSummary(){
+  const base = document.getElementById('summary-date').value || avui();
+  const {start,end} = getSummaryDates(base);
+  const label = formatRangeLabel(start,end);
+  document.getElementById('summary-label').value = label;
+  const rs = reserves.filter(r => inRange(r.data,start,end));
+  rs.forEach(recalculateReserva);
+  const totals = {
+    reservations: rs.length,
+    adults: rs.reduce((s,r)=>s+r.adults,0),
+    children: rs.reduce((s,r)=>s+r.children,0),
+    people: rs.reduce((s,r)=>s+r.totalPeople,0),
+    billed: rs.reduce((s,r)=>s+r.total,0),
+    deposit: rs.reduce((s,r)=>s+r.depositPaid,0),
+    remaining: rs.reduce((s,r)=>s+r.remainingPaid,0),
+  };
+  document.getElementById('st-reserves').textContent = totals.reservations;
+  document.getElementById('st-total').textContent = euro(totals.billed);
+  document.getElementById('st-adults').textContent = totals.adults;
+  document.getElementById('st-children').textContent = totals.children;
+  document.getElementById('summary-main-list').innerHTML = `
+    <div class="row"><span class="cl-k">Persones totals</span><span class="cl-v">${totals.people}</span></div>
+    <div class="row"><span class="cl-k">Cobrat en senyals</span><span class="cl-v green">${euro(totals.deposit)}</span></div>
+    <div class="row"><span class="cl-k">Cobrat de resta</span><span class="cl-v green">${euro(totals.remaining)}</span></div>
+    <div class="row"><span class="cl-k">Total cobrat</span><span class="cl-v">${euro(totals.deposit + totals.remaining)}</span></div>`;
+  const spaces = ['Casa','Barbacoa','Espai nou'];
+  const spaceData = spaces.map(name => ({
+    name,
+    reservations: rs.filter(r => r.tipus===name).length,
+    billed: rs.filter(r => r.tipus===name).reduce((s,r)=>s+r.total,0)
+  }));
+  document.getElementById('summary-space-list').innerHTML = spaceData.map(s => `<div class="row"><span class="cl-k">${s.name}</span><span class="cl-v">${s.reservations} · ${euro(s.billed)}</span></div>`).join('') || `<div class="row"><span class="cl-k">Espais</span><span class="cl-v">Sense dades</span></div>`;
+  const byDay = {};
+  rs.forEach(r => { byDay[r.data] = (byDay[r.data] || 0) + 1; });
+  const topDay = Object.entries(byDay).sort((a,b)=>b[1]-a[1])[0];
+  const topSpace = [...spaceData].sort((a,b)=>b.reservations-a.reservations)[0];
+  document.getElementById('summary-highlight-list').innerHTML = `
+    <div class="row"><span class="cl-k">Dia amb més reserves</span><span class="cl-v">${topDay ? fmt(topDay[0]) + ' · ' + topDay[1] : 'Sense dades'}</span></div>
+    <div class="row"><span class="cl-k">Espai més reservat</span><span class="cl-v">${topSpace && topSpace.reservations ? topSpace.name + ' · ' + topSpace.reservations : 'Sense dades'}</span></div>`;
+}
+
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function openNovaReservaModal(){
-  document.getElementById('m-data').value=avui();
-  tipusSelM='Barbacoa';
-  document.getElementById('m-btn-bbq').classList.add('active');
-  document.getElementById('m-btn-casa').classList.remove('active');
-  document.getElementById('m-btn-espai').classList.remove('active');
-  openModal('modalNova');
-}
 
-/* ═══════════════ INIT ═══════════════ */
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('f-data').value=avui();
-  document.getElementById('diners-data').value=avui();
+  document.getElementById('f-data').value = avui();
+  document.getElementById('f-bizum-data').value = avui();
+  document.getElementById('diners-data').value = avui();
+  document.getElementById('summary-date').value = avui();
+  updateCreateSummary();
   renderInici();
 });
 </script>
