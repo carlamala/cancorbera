@@ -67,9 +67,16 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .cal-dows{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px}.cal-dow{text-align:center;font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;padding-bottom:4px}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.cal-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;gap:3px;user-select:none}
 .cal-cell:active{transform:scale(.83)} .cal-num{font-size:14px;font-weight:600;line-height:1}
-.cal-cell.other .cal-num{color:var(--ink4);font-weight:400}.cal-cell.today{background:var(--green);box-shadow:0 3px 12px rgba(94,140,106,.35)} .cal-cell.today .cal-num{color:#fff;font-weight:800}.cal-cell.today .cal-dot{background:rgba(255,255,255,.8)!important}
+.cal-cell.other .cal-num{color:var(--ink4);font-weight:400}.cal-cell.today{background:var(--green);box-shadow:0 3px 12px rgba(94,140,106,.35)} .cal-cell.today .cal-num{color:#fff;font-weight:800}.cal-cell.today .cal-dot{box-shadow:0 0 0 1px rgba(255,255,255,.75)}
 .cal-cell.chosen:not(.today){background:var(--green-lt);outline:2px solid var(--green);outline-offset:-2px}.cal-cell.chosen:not(.today) .cal-num{color:var(--green-dk);font-weight:800}
-.cal-dot{width:5px;height:5px;border-radius:50%}.cal-cell.has-green .cal-dot{background:var(--green)}.cal-cell.has-earth .cal-dot{background:var(--earth)}.cal-detail-hdr{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--ink2);letter-spacing:-.2px}
+.cal-dots{display:flex;align-items:center;justify-content:center;gap:2px;min-height:6px;flex-wrap:wrap;max-width:28px}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex:0 0 auto}
+.cal-dot.bbq{background:var(--green)}
+.cal-dot.airbnb-in{background:#F2C94C}
+.cal-dot.airbnb-out{background:var(--red)}
+.cal-dot.airbnb-stay{background:var(--earth)}
+.cal-cell.has-pending:not(.today) .cal-num{color:var(--earth-dk)}
+.cal-detail-hdr{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--ink2);letter-spacing:-.2px}
 .form-card{padding:24px 18px}.form-title{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:22px}
 .form-group{margin-bottom:16px}.form-input,.form-select{width:100%;padding:15px 16px;border-radius:var(--r-md);background:var(--surface2);border:1.5px solid transparent;font-family:'Inter',sans-serif;font-size:16px;font-weight:500;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
 .form-input::placeholder{color:var(--ink4)} .form-input:focus,.form-select:focus{background:#fff;border-color:var(--green);box-shadow:0 0 0 4px rgba(94,140,106,.12)}
@@ -251,9 +258,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <div class="inline-summary-row"><span>Total general</span><strong id="sumTotal">0 €</strong></div>
     </div>
 
+    <!-- MODIFICAT: una sola paga i senyal. Aquest import crea/actualitza el pagament de tipus deposit. -->
     <div class="field-grid">
       <div class="form-group"><label class="form-label">Paga i senyal</label><input id="f-senyal" type="number" class="form-input" min="0" step="0.01" value="50"></div>
-      <div class="form-group"><label class="form-label">Mètode senyal</label>
+      <div class="form-group"><label class="form-label">Mètode</label>
         <select id="f-metode" class="form-select">
           <option value="Bizum">Bizum</option>
           <option value="Transferència">Transferència</option>
@@ -268,9 +276,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
           <option>Jordi</option><option>Carla</option><option>Anna</option><option>Miquel</option>
         </select>
       </div>
-      <div class="form-group"><label class="form-label">Data del pagament</label><input id="f-bizum-data" type="date" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Data</label><input id="f-bizum-data" type="date" class="form-input"></div>
     </div>
-    <div class="form-group"><label class="form-label">Import senyal pagada</label><input id="f-senyal-pagada" type="number" class="form-input" placeholder="50" min="0" step="0.01" value="0"></div>
     <div class="form-group"><label class="form-label">Notes</label><input id="f-notes" type="text" class="form-input" placeholder="Al·lèrgies, menú especial..."></div>
     <button class="btn-primary" id="createButton" onclick="saveReservaFromForm()">Guardar reserva</button>
     <button class="btn-secondary hide" id="cancelEditButton" onclick="cancelEdit()">Cancel·lar edició</button>
@@ -305,8 +312,17 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <button class="range-btn" id="range-capseta-year" onclick="setSummaryRange('year')">Anual</button>
   </div>
   <div class="filter-card" style="padding:16px 16px 4px;margin-bottom:14px;border-radius:var(--r-lg)">
-    <div class="field-grid">
-      <div class="form-group"><label class="form-label">Data base</label><input id="summary-date" type="date" class="form-input" onchange="renderSummary()"></div>
+    <!-- MODIFICAT: controls específics per cap de setmana, mes i any. -->
+    <div class="field-grid" id="summary-weekend-fields">
+      <div class="form-group"><label class="form-label">Data inici</label><input id="summary-start" type="date" class="form-input" onchange="renderSummary()"></div>
+      <div class="form-group"><label class="form-label">Data fi</label><input id="summary-end" type="date" class="form-input" onchange="renderSummary()"></div>
+    </div>
+    <div class="field-grid hide" id="summary-month-fields">
+      <div class="form-group"><label class="form-label">Mes</label><input id="summary-month" type="month" class="form-input" onchange="renderSummary()"></div>
+      <div class="form-group"><label class="form-label">Període</label><input id="summary-month-label" type="text" class="form-input" readonly></div>
+    </div>
+    <div class="field-grid hide" id="summary-year-fields">
+      <div class="form-group"><label class="form-label">Any</label><input id="summary-year" type="number" min="2000" max="2100" step="1" class="form-input" onchange="renderSummary()"></div>
       <div class="form-group"><label class="form-label">Període</label><input id="summary-label" type="text" class="form-input" readonly></div>
     </div>
   </div>
@@ -518,7 +534,7 @@ function showPage(name, tabEl, navEl){
   if(name==='calendari') renderCal();
   if(name==='pagaments') renderPagaments();
   if(name==='diners'){ document.getElementById('diners-data').value ||= avui(); renderDinersPage(); }
-  if(name==='resum'){ document.getElementById('summary-date').value ||= avui(); renderSummary(); }
+  if(name==='resum'){ ensureSummaryDefaults(); renderSummary(); }
 }
 function renderInici(){
   const ts = avui(), d = new Date();
@@ -537,7 +553,7 @@ function rcHTML(r){
   const pct = r.total > 0 ? Math.min(100, Math.round((r.totalPaid / r.total) * 100)) : 0;
   const st = r.estat === 'confirmat' ? 'confirmed' : 'pending';
   const tc = r.tipusReserva === 'Airbnb' ? 'airbnb' : (r.tipus === 'Barbacoa' ? 'bbq' : r.tipus === 'Espai nou' ? 'espai' : 'casa');
-  const signalText = r.depositPaid >= r.depositRequired ? 'Senyal pagada' : 'Senyal pendent';
+  const signalText = r.depositPaid > 0 ? 'Senyal pagada' : 'Senyal pendent';
   const meta = r.tipusReserva === 'Airbnb'
     ? `${fmt(r.checkin)} → ${fmt(r.checkout)} · ${r.telefon || 'sense telèfon'}`
     : `${fmt(r.data)} · ${r.telefon || 'sense telèfon'}`;
@@ -573,6 +589,16 @@ function isAirbnbOccupying(r, dateStr){
 function reservationsOnDate(dateStr){
   return reserves.filter(r => r.tipusReserva === 'Barbacoa' ? r.data === dateStr : isAirbnbOccupying(r, dateStr) || r.checkin === dateStr || r.checkout === dateStr);
 }
+// MODIFICAT: el calendari pinta indicadors separats perquè Airbnb entrada/sortida
+// es puguin combinar el mateix dia sense reutilitzar el verd de les barbacoes.
+function calendarDotsForDate(dateStr, dayReservations){
+  const dots = [];
+  if(dayReservations.some(r => r.tipusReserva === 'Barbacoa')) dots.push('bbq');
+  if(dayReservations.some(r => r.tipusReserva === 'Airbnb' && r.checkin === dateStr)) dots.push('airbnb-in');
+  if(dayReservations.some(r => r.tipusReserva === 'Airbnb' && r.checkout === dateStr)) dots.push('airbnb-out');
+  if(dayReservations.some(r => r.tipusReserva === 'Airbnb' && r.checkin !== dateStr && r.checkout !== dateStr && isAirbnbOccupying(r, dateStr))) dots.push('airbnb-stay');
+  return dots.map(kind => `<span class="cal-dot ${kind}"></span>`).join('');
+}
 function renderCal(){
   const y=calData.getFullYear(), m=calData.getMonth();
   document.getElementById('calMonth').textContent=`${MESOS[m]} ${y}`;
@@ -586,8 +612,9 @@ function renderCal(){
     const dr = ds ? reservationsOnDate(ds) : [];
     const hasPend = dr.some(r => r.estat === 'pendent');
     const isT = ds === avui() && !other, isCh = calTriat === ds && !other;
-    let cls='cal-cell'; if(other) cls+=' other'; if(isT) cls+=' today'; if(isCh && !isT) cls+=' chosen'; if(dr.length && !other) cls += hasPend ? ' has-earth' : ' has-green';
-    html += `<div class="${cls}" ${other?'':`onclick="selectCalDay('${ds}')"`}><div class="cal-num">${num}</div>${dr.length&&!other?'<div class="cal-dot"></div>':''}</div>`;
+    const dots = ds && !other ? calendarDotsForDate(ds, dr) : '';
+    let cls='cal-cell'; if(other) cls+=' other'; if(isT) cls+=' today'; if(isCh && !isT) cls+=' chosen'; if(hasPend && !other) cls += ' has-pending';
+    html += `<div class="${cls}" ${other?'':`onclick="selectCalDay('${ds}')"`}><div class="cal-num">${num}</div>${dots?`<div class="cal-dots">${dots}</div>`:''}</div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
   renderCalDetall();
@@ -638,8 +665,8 @@ function buildReservaFromForm(){
   const nom = document.getElementById('f-nom').value.trim();
   const telefon = document.getElementById('f-telefon').value.trim();
   const notes = document.getElementById('f-notes').value.trim();
-  const depositRequired = Number(document.getElementById('f-senyal').value || 50);
-  const depositAmount = Number(document.getElementById('f-senyal-pagada').value || 0);
+  const depositAmount = Number(document.getElementById('f-senyal').value || 0);
+  const depositRequired = depositAmount;
   const depositDate = document.getElementById('f-bizum-data').value || '';
   const depositReceiver = document.getElementById('f-receptor').value || '';
   const depositMethod = document.getElementById('f-metode').value || 'Bizum';
@@ -694,11 +721,10 @@ function fillFormForEdit(r){
   document.getElementById('f-nom').value = r.nom || '';
   document.getElementById('f-telefon').value = r.telefon || '';
   document.getElementById('f-notes').value = r.notes || '';
-  document.getElementById('f-senyal').value = r.depositRequired || 50;
+  document.getElementById('f-senyal').value = r.depositPaid || 0;
   document.getElementById('f-metode').value = r.depositMethod || 'Bizum';
   document.getElementById('f-receptor').value = r.depositReceiver || '';
   document.getElementById('f-bizum-data').value = r.depositDate || '';
-  document.getElementById('f-senyal-pagada').value = r.depositPaid || 0;
   if(r.tipusReserva === 'Airbnb'){
     document.getElementById('f-checkin').value = r.checkin || '';
     document.getElementById('f-checkout').value = r.checkout || '';
@@ -724,7 +750,7 @@ function clearCreateForm(){
   document.getElementById('f-data').value=avui();
   document.getElementById('f-adults').value='0'; document.getElementById('f-preu-adult').value=''; document.getElementById('f-children').value='0'; document.getElementById('f-preu-nen').value='';
   document.getElementById('f-checkin').value=avui(); document.getElementById('f-checkout').value=''; document.getElementById('f-guests').value='2'; document.getElementById('f-stay-total').value='';
-  document.getElementById('f-senyal').value='50'; document.getElementById('f-bizum-data').value=avui(); document.getElementById('f-receptor').value=''; document.getElementById('f-metode').value='Bizum'; document.getElementById('f-senyal-pagada').value='0';
+  document.getElementById('f-senyal').value='50'; document.getElementById('f-bizum-data').value=avui(); document.getElementById('f-receptor').value=''; document.getElementById('f-metode').value='Bizum';
   selectReservaType('Barbacoa'); tipusSel='Barbacoa'; selectTipus('Barbacoa'); updateCreateSummary();
 }
 function cancelEdit(){ clearCreateForm(); showPage('inici', null, document.getElementById('nav-inici')); }
@@ -784,9 +810,8 @@ function openDetall(id){
       <div class="det-row"><span class="dk">${r.tipusReserva==='Airbnb'?'Hostes':'Adults'}</span><span class="dv">${r.tipusReserva==='Airbnb'?r.totalPeople:(r.adults + ' · ' + euro(r.adultPrice))}</span></div>
       ${r.tipusReserva==='Barbacoa'?`<div class="det-row"><span class="dk">Nens</span><span class="dv">${r.children} · ${euro(r.childPrice)}</span></div>`:''}
       <div class="det-row"><span class="dk">Total reserva</span><span class="dv" style="color:var(--green)">${euro(r.total)}</span></div>
-      <div class="det-row"><span class="dk">Paga i senyal</span><span class="dv">${euro(r.depositRequired)}</span></div>
-      <div class="det-row"><span class="dk">Senyal pagada</span><span class="dv">${euro(r.depositPaid)}</span></div>
-      <div class="det-row"><span class="dk">Rebuda per</span><span class="dv">${r.depositReceiver || '—'}</span></div>
+      <div class="det-row"><span class="dk">Paga i senyal</span><span class="dv">${r.depositPaid ? euro(r.depositPaid) + ' · ' + (r.depositReceiver || 'sense receptor') : 'Pendent'}</span></div>
+      <div class="det-row"><span class="dk">Mètode i data</span><span class="dv">${r.depositPaid ? (r.depositMethod || '—') + ' · ' + fmt(r.depositDate) : '—'}</span></div>
       <div class="det-row"><span class="dk">Resta pagada</span><span class="dv">${euro(r.remainingPaid)}</span></div>
       <div class="det-row"><span class="dk">Resta rebuda per</span><span class="dv">${r.remainingReceiver || '—'}</span></div>
       <div class="det-row"><span class="dk">Pendent</span><span class="dv">${euro(r.pending)}</span></div>
@@ -911,13 +936,38 @@ function renderBizums(){
 function setSummaryRange(range){
   summaryRange = range;
   ['weekend','month','year'].forEach(r => document.getElementById('range-capseta-'+r).classList.toggle('active', r===range));
+  document.getElementById('summary-weekend-fields').classList.toggle('hide', range !== 'weekend');
+  document.getElementById('summary-month-fields').classList.toggle('hide', range !== 'month');
+  document.getElementById('summary-year-fields').classList.toggle('hide', range !== 'year');
+  ensureSummaryDefaults();
   renderSummary();
 }
-function getSummaryDates(base){
-  const d = parseDateLocal(base || avui());
-  if(summaryRange === 'month') return {start:new Date(d.getFullYear(), d.getMonth(), 1), end:new Date(d.getFullYear(), d.getMonth()+1, 0)};
-  if(summaryRange === 'year') return {start:new Date(d.getFullYear(), 0, 1), end:new Date(d.getFullYear(), 11, 31)};
-  return getWeekendRange(base);
+function dateToInput(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function ensureSummaryDefaults(){
+  const today = avui();
+  const weekend = getWeekendRange(today);
+  document.getElementById('summary-start').value ||= dateToInput(weekend.start);
+  document.getElementById('summary-end').value ||= dateToInput(weekend.end);
+  document.getElementById('summary-month').value ||= today.slice(0,7);
+  document.getElementById('summary-year').value ||= today.slice(0,4);
+}
+function getSummaryDates(){
+  ensureSummaryDefaults();
+  if(summaryRange === 'month'){
+    const [year, month] = document.getElementById('summary-month').value.split('-').map(Number);
+    const d = new Date(year, month - 1, 1);
+    return {start:d, end:new Date(year, month, 0)};
+  }
+  if(summaryRange === 'year'){
+    const year = Number(document.getElementById('summary-year').value || new Date().getFullYear());
+    return {start:new Date(year, 0, 1), end:new Date(year, 11, 31)};
+  }
+  const start = parseDateLocal(document.getElementById('summary-start').value);
+  const end = parseDateLocal(document.getElementById('summary-end').value);
+  if(start && end && start <= end) return {start,end};
+  return start && end ? {start:end,end:start} : getWeekendRange(avui());
 }
 function formatRangeLabel(start,end){
   if(summaryRange==='month') return `${MESOS[start.getMonth()]} ${start.getFullYear()}`;
@@ -932,9 +982,11 @@ function reservationInRange(r, start, end){
   return between(parseDateLocal(r.data), start, end);
 }
 function renderSummary(){
-  const base = document.getElementById('summary-date').value || avui();
-  const {start,end} = getSummaryDates(base);
-  document.getElementById('summary-label').value = formatRangeLabel(start,end);
+  // MODIFICAT: el filtre es calcula segons el control visible: dates lliures, mes o any.
+  const {start,end} = getSummaryDates();
+  const label = formatRangeLabel(start,end);
+  document.getElementById('summary-label').value = label;
+  document.getElementById('summary-month-label').value = label;
   const rs = reserves.filter(r => reservationInRange(r, start, end));
   const totals = {
     reservations: rs.length,
@@ -978,7 +1030,8 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.addEventListener('DOMContentLoaded', ()=>{
   clearCreateForm();
   document.getElementById('diners-data').value = avui();
-  document.getElementById('summary-date').value = avui();
+  ensureSummaryDefaults();
+  setSummaryRange(summaryRange);
   renderInici();
   initFirebase();
 });
