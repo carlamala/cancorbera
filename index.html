@@ -265,7 +265,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <div class="inline-summary">
       <div class="inline-summary-row"><span>Total adults / estada</span><strong id="sumAdults">0 €</strong></div>
       <div class="inline-summary-row"><span>Total nens</span><strong id="sumChildren">0 €</strong></div>
-      <div class="inline-summary-row"><span>Total general</span><strong id="sumTotal">0 €</strong></div>
+      <div class="inline-summary-row"><span>Total calculat</span><strong id="sumTotal">0 €</strong></div>
+    </div>
+    <div class="form-group" style="margin-top:4px">
+      <label class="form-label">Import manual (opcional · té prioritat)</label>
+      <input id="f-import-manual" type="number" class="form-input" min="0" step="0.01" placeholder="Deixa buit per usar el càlcul automàtic" oninput="updateCreateSummary()">
     </div>
 
     <!-- MODIFICAT: una sola paga i senyal. Aquest import crea/actualitza el pagament de tipus deposit. -->
@@ -474,6 +478,7 @@ function normalizeReserva(r){
   r.stayTotal = Number(r.stayTotal || 0);
   r.depositRequired = Number(r.depositRequired ?? 50);
   r.notes = r.notes || '';
+  r.importManual = r.importManual !== undefined && r.importManual !== null && r.importManual !== ''  ? Number(r.importManual) : null;
   if(!Array.isArray(r.payments)) r.payments = [];
   const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
   if(r.tipusReserva === 'Barbacoa'){
@@ -482,12 +487,13 @@ function normalizeReserva(r){
     r.totalPeople = r.adults + r.children;
     const calcTotal = r.totalAdults + r.totalChildren;
     const minim = MINIMS_ESPAI[r.tipus] || 0;
-    r.total = Math.max(calcTotal, minim);
+    const calcAmbMinim = Math.max(calcTotal, minim);
+    r.total = (r.importManual !== null && r.importManual > 0) ? r.importManual : calcAmbMinim;
   }else{
     r.totalAdults = r.stayTotal;
     r.totalChildren = 0;
     r.totalPeople = r.guests || r.adults || 0;
-    r.total = r.stayTotal;
+    r.total = (r.importManual !== null && r.importManual > 0) ? r.importManual : r.stayTotal;
   }
   const deposit = r.payments.find(p => p.type === 'deposit') || null;
   const remaining = r.payments.find(p => p.type === 'remaining') || null;
@@ -674,11 +680,17 @@ function updateCreateSummary(){
   const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
   const minim = MINIMS_ESPAI[tipusSel] || 0;
   const calcTotal = v.total || 0;
-  const totalFinal = Math.max(calcTotal, minim);
-  const minimAplicat = totalFinal > calcTotal && calcTotal >= 0;
+  const calcAmbMinim = Math.max(calcTotal, minim);
+  const minimAplicat = calcAmbMinim > calcTotal;
+  const importManualRaw = document.getElementById('f-import-manual').value;
+  const importManual = importManualRaw !== '' && Number(importManualRaw) > 0 ? Number(importManualRaw) : null;
   document.getElementById('sumAdults').textContent = euro(v.totalAdults || 0);
   document.getElementById('sumChildren').textContent = euro(v.totalChildren || 0);
-  document.getElementById('sumTotal').textContent = euro(totalFinal) + (minimAplicat ? ` (mínim ${minim}€)` : '');
+  if(importManual !== null){
+    document.getElementById('sumTotal').textContent = euro(importManual) + '  (import manual)';
+  } else {
+    document.getElementById('sumTotal').textContent = euro(calcAmbMinim) + (minimAplicat ? ` (mínim ${minim}€)` : '');
+  }
 }
 function buildReservaFromForm(){
   const nom = document.getElementById('f-nom').value.trim();
@@ -691,6 +703,9 @@ function buildReservaFromForm(){
   const depositMethod = document.getElementById('f-metode').value || 'Bizum';
   if(!nom){ toast('Falta el nom del client'); return null; }
 
+  const importManualRaw = document.getElementById('f-import-manual').value;
+  const importManual = importManualRaw !== ''  && Number(importManualRaw) > 0 ? Number(importManualRaw) : null;
+
   let reserva = {
     id: editingId || genId(),
     tipusReserva: reservaTypeSel,
@@ -702,6 +717,7 @@ function buildReservaFromForm(){
     adults: 0, adultPrice: 0, children: 0, childPrice: 0,
     guests: 0, stayTotal: 0,
     depositRequired,
+    importManual,
     payments: []
   };
 
@@ -757,6 +773,7 @@ function fillFormForEdit(r){
     document.getElementById('f-children').value = r.children || 0;
     document.getElementById('f-preu-nen').value = r.childPrice || 0;
   }
+  document.getElementById('f-import-manual').value = (r.importManual !== null && r.importManual > 0) ? r.importManual : '';
   updateCreateSummary();
   showPage('crear', null, document.getElementById('nav-crear'));
 }
@@ -770,6 +787,7 @@ function clearCreateForm(){
   document.getElementById('f-adults').value='0'; document.getElementById('f-preu-adult').value=''; document.getElementById('f-children').value='0'; document.getElementById('f-preu-nen').value='';
   document.getElementById('f-checkin').value=avui(); document.getElementById('f-checkout').value=''; document.getElementById('f-guests').value='2'; document.getElementById('f-stay-total').value='';
   document.getElementById('f-senyal').value='50'; document.getElementById('f-bizum-data').value=avui(); document.getElementById('f-receptor').value=''; document.getElementById('f-metode').value='Bizum';
+  document.getElementById('f-import-manual').value = '';
   selectReservaType('Barbacoa'); tipusSel='Barbacoa'; selectTipus('Barbacoa'); updateCreateSummary();
 }
 function cancelEdit(){ clearCreateForm(); showPage('inici', null, document.getElementById('nav-inici')); }
