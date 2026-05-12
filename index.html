@@ -308,9 +308,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <button class="range-btn active" id="range-diners-day" onclick="setDinersRange('day')">Dia</button>
     <button class="range-btn" id="range-diners-weekend" onclick="setDinersRange('weekend')">Cap de setmana</button>
   </div>
-  <div class="diners-date-row">
-    <div class="diners-lbl">Data base:</div>
+  <div id="diners-day-fields" class="diners-date-row">
+    <div class="diners-lbl">Dia:</div>
     <input id="diners-data" type="date" class="form-input" style="flex:1" onchange="renderDinersPage()">
+  </div>
+  <div id="diners-weekend-fields" class="field-grid hide" style="margin-bottom:12px">
+    <div class="form-group"><label class="form-label">Data inici</label><input id="diners-start" type="date" class="form-input" onchange="renderDinersPage()"></div>
+    <div class="form-group"><label class="form-label">Data fi</label><input id="diners-end" type="date" class="form-input" onchange="renderDinersPage()"></div>
   </div>
   <div id="diners-resultat"></div>
   <div class="biz-block">
@@ -478,7 +482,7 @@ function normalizeReserva(r){
   r.stayTotal = Number(r.stayTotal || 0);
   r.depositRequired = Number(r.depositRequired ?? 50);
   r.notes = r.notes || '';
-  r.importManual = r.importManual !== undefined && r.importManual !== null && r.importManual !== ''  ? Number(r.importManual) : null;
+  const _im = r.importManual; r.importManual = (_im !== undefined && _im !== null && _im !== '' && !isNaN(Number(_im)) && Number(_im) > 0) ? Number(_im) : null;
   if(!Array.isArray(r.payments)) r.payments = [];
   const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
   if(r.tipusReserva === 'Barbacoa'){
@@ -573,6 +577,7 @@ function rcHTML(r){
   const st = r.estat === 'confirmat' ? 'confirmed' : 'pending';
   const tc = r.tipusReserva === 'Airbnb' ? 'airbnb' : (r.tipus === 'Barbacoa' ? 'bbq' : r.tipus === 'Espai nou' ? 'espai' : 'casa');
   const signalText = r.depositPaid > 0 ? 'Senyal pagada' : 'Senyal pendent';
+  const importManualLabel = r.importManual ? \`Import manual: \${euro(r.importManual)}\` : null;
   const meta = r.tipusReserva === 'Airbnb'
     ? `${fmt(r.checkin)} → ${fmt(r.checkout)} · ${r.telefon || 'sense telèfon'}`
     : `${fmt(r.data)} · ${r.telefon || 'sense telèfon'}`;
@@ -594,6 +599,7 @@ function rcHTML(r){
       <span class="pill pax">${paxLabel}</span>
       <span class="pill tipo">${typeLabel}</span>
       <span class="pill info">${signalText}</span>
+      ${importManualLabel ? '<span class="pill tipo">'+importManualLabel+'</span>' : ''}
       <span class="pill ${st==='confirmed'?'ok':'wait'}">${st==='confirmed'?'Confirmada':'Pendent'}</span>
     </div>
     <div class="rc-bar"><div class="rc-bar-fill" style="width:${pct}%"></div></div>
@@ -846,7 +852,7 @@ function openDetall(id){
       <div class="det-row"><span class="dk">Espai</span><span class="dv">${r.tipus}</span></div>
       <div class="det-row"><span class="dk">${r.tipusReserva==='Airbnb'?'Hostes':'Adults'}</span><span class="dv">${r.tipusReserva==='Airbnb'?r.totalPeople:(r.adults + ' · ' + euro(r.adultPrice))}</span></div>
       ${r.tipusReserva==='Barbacoa'?`<div class="det-row"><span class="dk">Nens</span><span class="dv">${r.children} · ${euro(r.childPrice)}</span></div>`:''}
-      <div class="det-row"><span class="dk">Total reserva</span><span class="dv" style="color:var(--green)">${euro(r.total)}</span></div>
+      <div class="det-row"><span class="dk">Total reserva</span><span class="dv" style="color:var(--green)">${euro(r.total)}${r.importManual ? ' <span style="font-size:10px;font-weight:600;color:var(--ink3)">(manual)</span>' : ''}</span></div>
       <div class="det-row"><span class="dk">Paga i senyal</span><span class="dv">${r.depositPaid ? euro(r.depositPaid) + ' · ' + (r.depositReceiver || 'sense receptor') : 'Pendent'}</span></div>
       <div class="det-row"><span class="dk">Mètode i data</span><span class="dv">${r.depositPaid ? (r.depositMethod || '—') + ' · ' + fmt(r.depositDate) : '—'}</span></div>
       <div class="det-row"><span class="dk">Resta pagada</span><span class="dv">${euro(r.remainingPaid)}</span></div>
@@ -905,20 +911,52 @@ function setDinersRange(range){
   dinersRange = range;
   document.getElementById('range-diners-day').classList.toggle('active', range==='day');
   document.getElementById('range-diners-weekend').classList.toggle('active', range==='weekend');
+  document.getElementById('diners-day-fields').classList.toggle('hide', range!=='day');
+  document.getElementById('diners-weekend-fields').classList.toggle('hide', range!=='weekend');
+  // Pre-fill weekend fields with current day-field value if empty
+  if(range === 'weekend'){
+    const base = document.getElementById('diners-data').value || avui();
+    if(!document.getElementById('diners-start').value) document.getElementById('diners-start').value = base;
+    if(!document.getElementById('diners-end').value){
+      // default end = 2 days after start
+      const s = parseDateLocal(document.getElementById('diners-start').value || base);
+      s.setDate(s.getDate()+2);
+      document.getElementById('diners-end').value = dateToInput(s);
+    }
+  }
   renderDinersPage();
 }
 function getWeekendRange(base){
   const d = parseDateLocal(base || avui()); const day = d.getDay(); const diffToFriday = day === 0 ? -2 : 5 - day;
   const start = new Date(d); start.setDate(d.getDate()+diffToFriday); const end = new Date(start); end.setDate(start.getDate()+2); return {start,end};
 }
+function getDinersRange(){
+  if(dinersRange === 'day'){
+    const base = document.getElementById('diners-data').value || avui();
+    const d = parseDateLocal(base);
+    return {start: d, end: d, label: fmt(base)};
+  }
+  const startVal = document.getElementById('diners-start').value;
+  const endVal   = document.getElementById('diners-end').value;
+  const start = parseDateLocal(startVal) || parseDateLocal(avui());
+  const end   = parseDateLocal(endVal)   || start;
+  const realStart = start <= end ? start : end;
+  const realEnd   = start <= end ? end   : start;
+  return {
+    start: realStart,
+    end: realEnd,
+    label: fmt(dateToInput(realStart)) + ' → ' + fmt(dateToInput(realEnd))
+  };
+}
 function inCurrentDinersPeriod(r, base){
   if(r.tipusReserva !== 'Barbacoa') return false;
   if(dinersRange === 'day') return r.data === base;
-  const {start,end} = getWeekendRange(base);
+  const {start, end} = getDinersRange();
   return between(parseDateLocal(r.data), start, end);
 }
 function renderDinersPage(){
-  const base = document.getElementById('diners-data').value; if(!base) return;
+  const base = document.getElementById('diners-data').value || avui();
+  const {label} = getDinersRange();
   const dr = reserves.filter(r => inCurrentDinersPeriod(r, base));
   let totalGeneral=0, totalSignals=0, totalResta=0, jordiCarla=0, annaMiquel=0;
   dr.forEach(r => {
@@ -935,7 +973,6 @@ function renderDinersPage(){
   const meitat = totalGeneral / 2;
   const ajustJC = meitat - jordiCarla;
   const ajustAM = meitat - annaMiquel;
-  const label = dinersRange === 'day' ? fmt(base) : (()=>{ const rg=getWeekendRange(base); return `${fmt(rg.start.toISOString().slice(0,10))} → ${fmt(rg.end.toISOString().slice(0,10))}`; })();
   const box = document.getElementById('diners-resultat');
   if(!dr.length){ box.innerHTML = `<div class="empty"><div class="empty-txt">Sense barbacoes en aquest període</div></div>`; renderBizums(); return; }
   box.innerHTML = `
@@ -958,7 +995,7 @@ function renderDinersPage(){
   renderBizums();
 }
 function renderBizums(){
-  const base = document.getElementById('diners-data').value;
+  const base = document.getElementById('diners-data').value || avui();
   const deposits = reserves
     .filter(r => inCurrentDinersPeriod(r, base))
     .flatMap(r => (r.payments || []).filter(p => p.type === 'deposit').map(p => ({...p, reservaNom:r.nom})));
