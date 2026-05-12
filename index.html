@@ -475,11 +475,14 @@ function normalizeReserva(r){
   r.depositRequired = Number(r.depositRequired ?? 50);
   r.notes = r.notes || '';
   if(!Array.isArray(r.payments)) r.payments = [];
+  const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
   if(r.tipusReserva === 'Barbacoa'){
     r.totalAdults = r.adults * r.adultPrice;
     r.totalChildren = r.children * r.childPrice;
     r.totalPeople = r.adults + r.children;
-    r.total = r.totalAdults + r.totalChildren;
+    const calcTotal = r.totalAdults + r.totalChildren;
+    const minim = MINIMS_ESPAI[r.tipus] || 0;
+    r.total = Math.max(calcTotal, minim);
   }else{
     r.totalAdults = r.stayTotal;
     r.totalChildren = 0;
@@ -652,6 +655,7 @@ function selectTipus(t){
   document.getElementById('btn-bbq').classList.toggle('active',t==='Barbacoa');
   document.getElementById('btn-casa').classList.toggle('active',t==='Casa');
   document.getElementById('btn-espai').classList.toggle('active',t==='Espai nou');
+  updateCreateSummary();
 }
 function getCreateValues(){
   if(reservaTypeSel === 'Airbnb'){
@@ -667,9 +671,14 @@ function getCreateValues(){
 }
 function updateCreateSummary(){
   const v = getCreateValues();
+  const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
+  const minim = MINIMS_ESPAI[tipusSel] || 0;
+  const calcTotal = v.total || 0;
+  const totalFinal = Math.max(calcTotal, minim);
+  const minimAplicat = totalFinal > calcTotal && calcTotal >= 0;
   document.getElementById('sumAdults').textContent = euro(v.totalAdults || 0);
   document.getElementById('sumChildren').textContent = euro(v.totalChildren || 0);
-  document.getElementById('sumTotal').textContent = euro(v.total || 0);
+  document.getElementById('sumTotal').textContent = euro(totalFinal) + (minimAplicat ? ` (mínim ${minim}€)` : '');
 }
 function buildReservaFromForm(){
   const nom = document.getElementById('f-nom').value.trim();
@@ -706,7 +715,7 @@ function buildReservaFromForm(){
   }else{
     const data = document.getElementById('f-data').value;
     const v = getCreateValues();
-    if(!data || v.total <= 0){ toast('Completa les dades de la barbacoa'); return null; }
+    if(!data){ toast('Falta la data de la barbacoa'); return null; }
     reserva.data = data;
     reserva.adults = v.adults; reserva.adultPrice = v.adultPrice; reserva.children = v.children; reserva.childPrice = v.childPrice;
   }
