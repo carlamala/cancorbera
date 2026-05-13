@@ -265,11 +265,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <div class="inline-summary">
       <div class="inline-summary-row"><span>Total adults / estada</span><strong id="sumAdults">0 €</strong></div>
       <div class="inline-summary-row"><span>Total nens</span><strong id="sumChildren">0 €</strong></div>
-      <div class="inline-summary-row"><span>Total calculat</span><strong id="sumTotal">0 €</strong></div>
-    </div>
-    <div class="form-group" style="margin-top:4px">
-      <label class="form-label">Import manual (opcional · té prioritat)</label>
-      <input id="f-import-manual" type="number" class="form-input" min="0" step="0.01" placeholder="Deixa buit per usar el càlcul automàtic" oninput="updateCreateSummary()">
+      <div class="inline-summary-row"><span>Total general</span><strong id="sumTotal">0 €</strong></div>
     </div>
 
     <!-- MODIFICAT: una sola paga i senyal. Aquest import crea/actualitza el pagament de tipus deposit. -->
@@ -308,11 +304,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <button class="range-btn active" id="range-diners-day" onclick="setDinersRange('day')">Dia</button>
     <button class="range-btn" id="range-diners-weekend" onclick="setDinersRange('weekend')">Cap de setmana</button>
   </div>
-  <div id="diners-day-fields" class="diners-date-row">
+  <div id="diners-day-wrap" class="diners-date-row">
     <div class="diners-lbl">Dia:</div>
     <input id="diners-data" type="date" class="form-input" style="flex:1" onchange="renderDinersPage()">
   </div>
-  <div id="diners-weekend-fields" class="field-grid hide" style="margin-bottom:12px">
+  <div id="diners-range-wrap" class="field-grid hide" style="margin-bottom:12px">
     <div class="form-group"><label class="form-label">Data inici</label><input id="diners-start" type="date" class="form-input" onchange="renderDinersPage()"></div>
     <div class="form-group"><label class="form-label">Data fi</label><input id="diners-end" type="date" class="form-input" onchange="renderDinersPage()"></div>
   </div>
@@ -482,7 +478,6 @@ function normalizeReserva(r){
   r.stayTotal = Number(r.stayTotal || 0);
   r.depositRequired = Number(r.depositRequired ?? 50);
   r.notes = r.notes || '';
-  const _im = r.importManual; r.importManual = (_im !== undefined && _im !== null && _im !== '' && !isNaN(Number(_im)) && Number(_im) > 0) ? Number(_im) : null;
   if(!Array.isArray(r.payments)) r.payments = [];
   const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
   if(r.tipusReserva === 'Barbacoa'){
@@ -491,13 +486,12 @@ function normalizeReserva(r){
     r.totalPeople = r.adults + r.children;
     const calcTotal = r.totalAdults + r.totalChildren;
     const minim = MINIMS_ESPAI[r.tipus] || 0;
-    const calcAmbMinim = Math.max(calcTotal, minim);
-    r.total = (r.importManual !== null && r.importManual > 0) ? r.importManual : calcAmbMinim;
+    r.total = Math.max(calcTotal, minim);
   }else{
     r.totalAdults = r.stayTotal;
     r.totalChildren = 0;
     r.totalPeople = r.guests || r.adults || 0;
-    r.total = (r.importManual !== null && r.importManual > 0) ? r.importManual : r.stayTotal;
+    r.total = r.stayTotal;
   }
   const deposit = r.payments.find(p => p.type === 'deposit') || null;
   const remaining = r.payments.find(p => p.type === 'remaining') || null;
@@ -556,7 +550,12 @@ function showPage(name, tabEl, navEl){
   if(name==='inici') renderInici();
   if(name==='calendari') renderCal();
   if(name==='pagaments') renderPagaments();
-  if(name==='diners'){ document.getElementById('diners-data').value ||= avui(); renderDinersPage(); }
+  if(name==='diners'){
+    if(!document.getElementById('diners-data').value)  document.getElementById('diners-data').value  = avui();
+    if(!document.getElementById('diners-start').value) document.getElementById('diners-start').value = avui();
+    if(!document.getElementById('diners-end').value)   document.getElementById('diners-end').value   = avui();
+    renderDinersPage();
+  }
   if(name==='resum'){ ensureSummaryDefaults(); renderSummary(); }
 }
 function renderInici(){
@@ -577,7 +576,6 @@ function rcHTML(r){
   const st = r.estat === 'confirmat' ? 'confirmed' : 'pending';
   const tc = r.tipusReserva === 'Airbnb' ? 'airbnb' : (r.tipus === 'Barbacoa' ? 'bbq' : r.tipus === 'Espai nou' ? 'espai' : 'casa');
   const signalText = r.depositPaid > 0 ? 'Senyal pagada' : 'Senyal pendent';
-  const importManualLabel = r.importManual ? \`Import manual: \${euro(r.importManual)}\` : null;
   const meta = r.tipusReserva === 'Airbnb'
     ? `${fmt(r.checkin)} → ${fmt(r.checkout)} · ${r.telefon || 'sense telèfon'}`
     : `${fmt(r.data)} · ${r.telefon || 'sense telèfon'}`;
@@ -599,7 +597,6 @@ function rcHTML(r){
       <span class="pill pax">${paxLabel}</span>
       <span class="pill tipo">${typeLabel}</span>
       <span class="pill info">${signalText}</span>
-      ${importManualLabel ? '<span class="pill tipo">'+importManualLabel+'</span>' : ''}
       <span class="pill ${st==='confirmed'?'ok':'wait'}">${st==='confirmed'?'Confirmada':'Pendent'}</span>
     </div>
     <div class="rc-bar"><div class="rc-bar-fill" style="width:${pct}%"></div></div>
@@ -686,17 +683,11 @@ function updateCreateSummary(){
   const MINIMS_ESPAI = { 'Casa': 170, 'Barbacoa': 150, 'Espai nou': 160 };
   const minim = MINIMS_ESPAI[tipusSel] || 0;
   const calcTotal = v.total || 0;
-  const calcAmbMinim = Math.max(calcTotal, minim);
-  const minimAplicat = calcAmbMinim > calcTotal;
-  const importManualRaw = document.getElementById('f-import-manual').value;
-  const importManual = importManualRaw !== '' && Number(importManualRaw) > 0 ? Number(importManualRaw) : null;
+  const totalFinal = Math.max(calcTotal, minim);
+  const minimAplicat = totalFinal > calcTotal && calcTotal >= 0;
   document.getElementById('sumAdults').textContent = euro(v.totalAdults || 0);
   document.getElementById('sumChildren').textContent = euro(v.totalChildren || 0);
-  if(importManual !== null){
-    document.getElementById('sumTotal').textContent = euro(importManual) + '  (import manual)';
-  } else {
-    document.getElementById('sumTotal').textContent = euro(calcAmbMinim) + (minimAplicat ? ` (mínim ${minim}€)` : '');
-  }
+  document.getElementById('sumTotal').textContent = euro(totalFinal) + (minimAplicat ? ` (mínim ${minim}€)` : '');
 }
 function buildReservaFromForm(){
   const nom = document.getElementById('f-nom').value.trim();
@@ -709,9 +700,6 @@ function buildReservaFromForm(){
   const depositMethod = document.getElementById('f-metode').value || 'Bizum';
   if(!nom){ toast('Falta el nom del client'); return null; }
 
-  const importManualRaw = document.getElementById('f-import-manual').value;
-  const importManual = importManualRaw !== ''  && Number(importManualRaw) > 0 ? Number(importManualRaw) : null;
-
   let reserva = {
     id: editingId || genId(),
     tipusReserva: reservaTypeSel,
@@ -723,7 +711,6 @@ function buildReservaFromForm(){
     adults: 0, adultPrice: 0, children: 0, childPrice: 0,
     guests: 0, stayTotal: 0,
     depositRequired,
-    importManual,
     payments: []
   };
 
@@ -779,7 +766,6 @@ function fillFormForEdit(r){
     document.getElementById('f-children').value = r.children || 0;
     document.getElementById('f-preu-nen').value = r.childPrice || 0;
   }
-  document.getElementById('f-import-manual').value = (r.importManual !== null && r.importManual > 0) ? r.importManual : '';
   updateCreateSummary();
   showPage('crear', null, document.getElementById('nav-crear'));
 }
@@ -793,7 +779,6 @@ function clearCreateForm(){
   document.getElementById('f-adults').value='0'; document.getElementById('f-preu-adult').value=''; document.getElementById('f-children').value='0'; document.getElementById('f-preu-nen').value='';
   document.getElementById('f-checkin').value=avui(); document.getElementById('f-checkout').value=''; document.getElementById('f-guests').value='2'; document.getElementById('f-stay-total').value='';
   document.getElementById('f-senyal').value='50'; document.getElementById('f-bizum-data').value=avui(); document.getElementById('f-receptor').value=''; document.getElementById('f-metode').value='Bizum';
-  document.getElementById('f-import-manual').value = '';
   selectReservaType('Barbacoa'); tipusSel='Barbacoa'; selectTipus('Barbacoa'); updateCreateSummary();
 }
 function cancelEdit(){ clearCreateForm(); showPage('inici', null, document.getElementById('nav-inici')); }
@@ -852,7 +837,7 @@ function openDetall(id){
       <div class="det-row"><span class="dk">Espai</span><span class="dv">${r.tipus}</span></div>
       <div class="det-row"><span class="dk">${r.tipusReserva==='Airbnb'?'Hostes':'Adults'}</span><span class="dv">${r.tipusReserva==='Airbnb'?r.totalPeople:(r.adults + ' · ' + euro(r.adultPrice))}</span></div>
       ${r.tipusReserva==='Barbacoa'?`<div class="det-row"><span class="dk">Nens</span><span class="dv">${r.children} · ${euro(r.childPrice)}</span></div>`:''}
-      <div class="det-row"><span class="dk">Total reserva</span><span class="dv" style="color:var(--green)">${euro(r.total)}${r.importManual ? ' <span style="font-size:10px;font-weight:600;color:var(--ink3)">(manual)</span>' : ''}</span></div>
+      <div class="det-row"><span class="dk">Total reserva</span><span class="dv" style="color:var(--green)">${euro(r.total)}</span></div>
       <div class="det-row"><span class="dk">Paga i senyal</span><span class="dv">${r.depositPaid ? euro(r.depositPaid) + ' · ' + (r.depositReceiver || 'sense receptor') : 'Pendent'}</span></div>
       <div class="det-row"><span class="dk">Mètode i data</span><span class="dv">${r.depositPaid ? (r.depositMethod || '—') + ' · ' + fmt(r.depositDate) : '—'}</span></div>
       <div class="det-row"><span class="dk">Resta pagada</span><span class="dv">${euro(r.remainingPaid)}</span></div>
@@ -911,16 +896,14 @@ function setDinersRange(range){
   dinersRange = range;
   document.getElementById('range-diners-day').classList.toggle('active', range==='day');
   document.getElementById('range-diners-weekend').classList.toggle('active', range==='weekend');
-  document.getElementById('diners-day-fields').classList.toggle('hide', range!=='day');
-  document.getElementById('diners-weekend-fields').classList.toggle('hide', range!=='weekend');
-  // Pre-fill weekend fields with current day-field value if empty
+  document.getElementById('diners-day-wrap').classList.toggle('hide', range!=='day');
+  document.getElementById('diners-range-wrap').classList.toggle('hide', range!=='weekend');
   if(range === 'weekend'){
     const base = document.getElementById('diners-data').value || avui();
     if(!document.getElementById('diners-start').value) document.getElementById('diners-start').value = base;
     if(!document.getElementById('diners-end').value){
-      // default end = 2 days after start
       const s = parseDateLocal(document.getElementById('diners-start').value || base);
-      s.setDate(s.getDate()+2);
+      s.setDate(s.getDate() + 2);
       document.getElementById('diners-end').value = dateToInput(s);
     }
   }
@@ -930,33 +913,19 @@ function getWeekendRange(base){
   const d = parseDateLocal(base || avui()); const day = d.getDay(); const diffToFriday = day === 0 ? -2 : 5 - day;
   const start = new Date(d); start.setDate(d.getDate()+diffToFriday); const end = new Date(start); end.setDate(start.getDate()+2); return {start,end};
 }
-function getDinersRange(){
-  if(dinersRange === 'day'){
-    const base = document.getElementById('diners-data').value || avui();
-    const d = parseDateLocal(base);
-    return {start: d, end: d, label: fmt(base)};
-  }
-  const startVal = document.getElementById('diners-start').value;
-  const endVal   = document.getElementById('diners-end').value;
-  const start = parseDateLocal(startVal) || parseDateLocal(avui());
-  const end   = parseDateLocal(endVal)   || start;
-  const realStart = start <= end ? start : end;
-  const realEnd   = start <= end ? end   : start;
-  return {
-    start: realStart,
-    end: realEnd,
-    label: fmt(dateToInput(realStart)) + ' → ' + fmt(dateToInput(realEnd))
-  };
-}
 function inCurrentDinersPeriod(r, base){
   if(r.tipusReserva !== 'Barbacoa') return false;
   if(dinersRange === 'day') return r.data === base;
-  const {start, end} = getDinersRange();
-  return between(parseDateLocal(r.data), start, end);
+  const startVal = document.getElementById('diners-start').value;
+  const endVal   = document.getElementById('diners-end').value;
+  const s = parseDateLocal(startVal) || parseDateLocal(avui());
+  const e = parseDateLocal(endVal)   || s;
+  const rs = s <= e ? s : e;
+  const re = s <= e ? e : s;
+  return between(parseDateLocal(r.data), rs, re);
 }
 function renderDinersPage(){
-  const base = document.getElementById('diners-data').value || avui();
-  const {label} = getDinersRange();
+  const base = document.getElementById('diners-data').value; if(!base) return;
   const dr = reserves.filter(r => inCurrentDinersPeriod(r, base));
   let totalGeneral=0, totalSignals=0, totalResta=0, jordiCarla=0, annaMiquel=0;
   dr.forEach(r => {
@@ -973,6 +942,11 @@ function renderDinersPage(){
   const meitat = totalGeneral / 2;
   const ajustJC = meitat - jordiCarla;
   const ajustAM = meitat - annaMiquel;
+  const label = dinersRange === 'day' ? fmt(base) : (() => {
+    const sv = document.getElementById('diners-start').value;
+    const ev = document.getElementById('diners-end').value;
+    return (sv ? fmt(sv) : '?') + ' → ' + (ev ? fmt(ev) : '?');
+  })();
   const box = document.getElementById('diners-resultat');
   if(!dr.length){ box.innerHTML = `<div class="empty"><div class="empty-txt">Sense barbacoes en aquest període</div></div>`; renderBizums(); return; }
   box.innerHTML = `
@@ -995,7 +969,7 @@ function renderDinersPage(){
   renderBizums();
 }
 function renderBizums(){
-  const base = document.getElementById('diners-data').value || avui();
+  const base = document.getElementById('diners-data').value;
   const deposits = reserves
     .filter(r => inCurrentDinersPeriod(r, base))
     .flatMap(r => (r.payments || []).filter(p => p.type === 'deposit').map(p => ({...p, reservaNom:r.nom})));
