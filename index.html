@@ -958,7 +958,8 @@ function renderDinersPage(){
       if(p.receiver === 'Anna' || p.receiver === 'Miquel') annaMiquel += amt;
     });
   });
-  const meitat = totalGeneral / 2;
+  const totalAmbCobrats = totalGeneral + jordiCarla + annaMiquel;
+  const meitat = totalAmbCobrats / 2;
   const ajustJC = meitat - jordiCarla;
   const ajustAM = meitat - annaMiquel;
   const label = dinersRange === 'day' ? fmt(base) : (() => {
@@ -971,7 +972,7 @@ function renderDinersPage(){
   box.innerHTML = `
     <div class="d-hero"><div class="dh-eye">Barbacoes · ${label}</div><div class="dh-val">${euro(totalGeneral)}</div><div class="dh-foot">${dr.length} reserva${dr.length!==1?'s':''} · repartit entre 2</div></div>
     <div class="diners-grid-4">
-      <div class="dcard meitat"><div class="dc-eye">Meitat</div><div class="dc-val">${euro(meitat)}</div><div class="dc-note">50% del total generat</div></div>
+      <div class="dcard meitat"><div class="dc-eye">Meitat</div><div class="dc-val">${euro(meitat)}</div><div class="dc-note">50% del total + ja cobrat</div></div>
       <div class="dcard total"><div class="dc-eye">Senyals</div><div class="dc-val">${euro(totalSignals)}</div><div class="dc-note">pagades abans</div></div>
       <div class="dcard nos"><div class="dc-eye">Jordi i Carla</div><div class="dc-val">${euro(ajustJC)}</div><div class="dc-note">meitat menys cobrat</div></div>
       <div class="dcard ells"><div class="dc-eye">Anna i Miquel</div><div class="dc-val">${euro(ajustAM)}</div><div class="dc-note">meitat menys cobrat</div></div>
