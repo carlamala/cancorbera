@@ -579,9 +579,9 @@ function showPage(name, tabEl, navEl){
   if(name==='calendari') renderCal();
   if(name==='pagaments') renderPagaments();
   if(name==='diners'){
-    if(!document.getElementById('diners-data').value)  document.getElementById('diners-data').value  = avui();
-    if(!document.getElementById('diners-start').value) document.getElementById('diners-start').value = avui();
-    if(!document.getElementById('diners-end').value)   document.getElementById('diners-end').value   = avui();
+    document.getElementById('diners-data').value  = document.getElementById('diners-data').value  || avui();
+    document.getElementById('diners-start').value = document.getElementById('diners-start').value || avui();
+    document.getElementById('diners-end').value   = document.getElementById('diners-end').value   || avui();
     renderDinersPage();
   }
   if(name==='resum'){ ensureSummaryDefaults(); renderSummary(); }
@@ -992,7 +992,7 @@ function inCurrentDinersPeriod(r, base){
   return between(parseDateLocal(r.data), rs, re);
 }
 function renderDinersPage(){
-  const base = document.getElementById('diners-data').value; if(!base) return;
+  const base = document.getElementById('diners-data').value || avui();
   const dr = reserves.filter(r => inCurrentDinersPeriod(r, base));
 
   // Acumuladors separats per tipus de pagament i receptor
@@ -1007,42 +1007,46 @@ function renderDinersPage(){
     totalGeneral  += r.total;
     totalEstancia += r.totalEstancia || r.total;
     totalPaella   += r.totalPaella   || 0;
-    const payments = r.payments || [];
-    payments.forEach(p => {
-      const amt = Number(p.amount || 0);
-      const isJC = p.receiver === 'Jordi' || p.receiver === 'Carla';
-      const isAM = p.receiver === 'Anna'  || p.receiver === 'Miquel';
-      if(p.type === 'deposit'){
-        if(isJC) bizumsJC += amt;
-        if(isAM) bizumsAM += amt;
-      } else {
-        if(isJC) cobrosDiaJC += amt;
-        if(isAM) cobrosDiaAM += amt;
-      }
-    });
+
+    // Senyal (deposit) — usem els camps normalitzats de la reserva
+    const depAmt = Number(r.depositPaid || 0);
+    const depRec = r.depositReceiver || '';
+    const isDepJC = depRec === 'Jordi' || depRec === 'Carla';
+    const isDepAM = depRec === 'Anna'  || depRec === 'Miquel';
+    if(isDepJC) bizumsJC += depAmt;
+    if(isDepAM) bizumsAM += depAmt;
+
+    // Cobro del dia (remaining) — usem els camps normalitzats
+    const remAmt = Number(r.remainingPaid || 0);
+    const remRec = r.remainingReceiver || '';
+    const isRemJC = remRec === 'Jordi' || remRec === 'Carla';
+    const isRemAM = remRec === 'Anna'  || remRec === 'Miquel';
+    if(isRemJC) cobrosDiaJC += remAmt;
+    if(isRemAM) cobrosDiaAM += remAmt;
+
+    // Pagaments sense receptor: els afegim als cobros del dia sense assignar a cap part
+    // (apareixeran al total però no distorsionaran el saldo de cap part)
   });
 
-  // FORMULA EXACTA:
-  // cobrosDiaEstancia = total dels cobros del dia (sense paella)
-  // Si hi ha paella, els cobros del dia de JC poden incloure la paella
-  // Assumim que la paella es cobra tota per JC (si s'ha cobrat)
-  const cobrosDiaEstanciaJC = Math.max(0, cobrosDiaJC - totalPaella);
-  const cobrosDiaEstanciaAM = cobrosDiaAM;
-  const cobrosDiaEstancia   = cobrosDiaEstanciaJC + cobrosDiaEstanciaAM;
-
-  // Total real estancia = cobros dia estancia + senyals JC + senyals AM
-  const totalRealEstancia = cobrosDiaEstancia + bizumsJC + bizumsAM;
+  // FORMULA: usar el total pactat de les reserves com a base del repartiment
+  // (independent de si s'ha cobrat o no, i de qui ha cobrat)
+  // totalEstancia = suma dels preus pactats d'estancia de totes les reserves del període
+  const totalRealEstancia = totalEstancia; // preu pactat total d'estancia
   const meitatEstancia    = totalRealEstancia / 2;
 
-  // Ja cobrat per cada part (de l'estancia)
-  const cobratJC = cobrosDiaEstanciaJC + bizumsJC;
-  const cobratAM = cobrosDiaEstanciaAM + bizumsAM;
+  // Ja cobrat per cada part: senyals + cobros del dia assignats
+  const cobratJC = bizumsJC + cobrosDiaJC;
+  const cobratAM = bizumsAM + cobrosDiaAM;
 
   // Saldo: positiu = ha de rebre, negatiu = ha de donar
   const saldoJC = meitatEstancia - cobratJC;
   const saldoAM = meitatEstancia - cobratAM;
 
-  // Per mostrar als totals
+  // Pagaments sense receptor assignat (per mostrar avís)
+  const totalCobratAssignat = cobratJC + cobratAM;
+  const sensereceptor = (totalEstancia - totalPaella) - totalCobratAssignat > 0.01
+    ? (totalEstancia - totalPaella) - totalCobratAssignat : 0;
+
   const ajustJC = saldoJC;
   const ajustAM = saldoAM;
   const meitat  = meitatEstancia;
@@ -1056,28 +1060,25 @@ function renderDinersPage(){
   box.innerHTML = `
     <div class="d-hero"><div class="dh-eye">Barbacoes · ${label}</div><div class="dh-val">${euro(totalGeneral)}</div><div class="dh-foot">${dr.length} reserva${dr.length!==1?'s':''} · repartit entre 2</div></div>
     <div class="diners-grid-4">
-      <div class="dcard meitat"><div class="dc-eye">Total estancia real</div><div class="dc-val">${euro(totalRealEstancia)}</div><div class="dc-note">cobros + senyals JC + AM</div></div>
+      <div class="dcard meitat"><div class="dc-eye">Total estancia</div><div class="dc-val">${euro(totalRealEstancia)}</div><div class="dc-note">preu pactat reserves</div></div>
       <div class="dcard total"><div class="dc-eye">Meitat estancia</div><div class="dc-val">${euro(meitatEstancia)}</div><div class="dc-note">50% per a cada part</div></div>
       <div class="dcard nos"><div class="dc-eye">Jordi i Carla</div><div class="dc-val">${saldoJC >= 0 ? euro(saldoJC) : '-'+euro(Math.abs(saldoJC))}</div><div class="dc-note">${saldoJC >= 0 ? 'a rebre' : 'a donar'}</div></div>
       <div class="dcard ells"><div class="dc-eye">Anna i Miquel</div><div class="dc-val">${saldoAM >= 0 ? euro(saldoAM) : '-'+euro(Math.abs(saldoAM))}</div><div class="dc-note">${saldoAM >= 0 ? 'a rebre' : 'a donar'}</div></div>
     </div>
     <div class="calc-block">
-      <div class="calc-line"><span class="cl-k">Senyals/Bizums Jordi i Carla</span><span class="cl-v earth">${euro(bizumsJC)}</span></div>
-      <div class="calc-line"><span class="cl-k">Senyals/Bizums Anna i Miquel</span><span class="cl-v earth">${euro(bizumsAM)}</span></div>
-      <div class="calc-line"><span class="cl-k">Cobros del dia Jordi i Carla</span><span class="cl-v earth">${euro(cobrosDiaEstanciaJC)}</span></div>
-      <div class="calc-line"><span class="cl-k">Cobros del dia Anna i Miquel</span><span class="cl-v earth">${euro(cobrosDiaEstanciaAM)}</span></div>
+      <div class="calc-line"><span class="cl-k">Total estancia (preu pactat)</span><span class="cl-v">${euro(totalRealEstancia)}</span></div>
       ${totalPaella > 0 ? '<div class="calc-line"><span class="cl-k">Paella (100% Jordi i Carla)</span><span class="cl-v">' + euro(totalPaella) + '</span></div>' : ''}
-      <div class="calc-line"><span class="cl-k">Total estancia real</span><span class="cl-v">${euro(totalRealEstancia)}</span></div>
       <div class="calc-line"><span class="cl-k">Meitat estancia (cada part)</span><span class="cl-v green">${euro(meitatEstancia)}</span></div>
-      <div class="calc-line"><span class="cl-k">Ja cobrat Jordi i Carla</span><span class="cl-v earth">${euro(cobratJC)}</span></div>
-      <div class="calc-line"><span class="cl-k">Ja cobrat Anna i Miquel</span><span class="cl-v earth">${euro(cobratAM)}</span></div>
+      <div class="calc-line"><span class="cl-k">Cobrat per Jordi i Carla</span><span class="cl-v earth">${euro(cobratJC)}</span></div>
+      <div class="calc-line"><span class="cl-k">Cobrat per Anna i Miquel</span><span class="cl-v earth">${euro(cobratAM)}</span></div>
+      ${sensereceptor > 0.01 ? '<div class="calc-line"><span class="cl-k" style="color:var(--red)">⚠ Sense receptor assignat</span><span class="cl-v" style="color:var(--red)">' + euro(sensereceptor) + '</span></div>' : ''}
       <div class="calc-line highlight"><span class="cl-k" style="font-weight:700;color:var(--ink)">Saldo Jordi i Carla</span><span class="cl-v strong">${saldoJC >= 0 ? euro(saldoJC) + ' a rebre' : euro(Math.abs(saldoJC)) + ' a donar'}</span></div>
       <div class="calc-line"><span class="cl-k">Saldo Anna i Miquel</span><span class="cl-v earth">${saldoAM >= 0 ? euro(saldoAM) + ' a rebre' : euro(Math.abs(saldoAM)) + ' a donar'}</span></div>
     </div>`;
   renderBizums();
 }
 function renderBizums(){
-  const base = document.getElementById('diners-data').value;
+  const base = document.getElementById('diners-data').value || avui();
   const deposits = reserves
     .filter(r => inCurrentDinersPeriod(r, base))
     .flatMap(r => (r.payments || []).filter(p => p.type === 'deposit').map(p => ({...p, reservaNom:r.nom})));
