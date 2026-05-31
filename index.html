@@ -1003,29 +1003,32 @@ function renderDinersPage(){
   // Cobros del dia (remaining) per receptor
   let cobrosDiaJC = 0, cobrosDiaAM = 0;
 
+  console.log('[Diners] reserves trobades:', dr.length, dr.map(r=>r.nom+' '+r.data));
   dr.forEach(r => {
     totalGeneral  += r.total;
     totalEstancia += r.totalEstancia || r.total;
     totalPaella   += r.totalPaella   || 0;
 
+    console.log('[Diners] reserva:', r.nom, 'total:', r.total, 'payments:', JSON.stringify(r.payments));
+
     // Llegir TOTS els pagaments directament de r.payments[]
-    // per garantir que recollim el receiver real guardat a Firebase
     (r.payments || []).forEach(p => {
       const amt = Number(p.amount || 0);
       if(!amt) return;
       const rec = p.receiver || '';
       const isJC = rec === 'Jordi' || rec === 'Carla';
       const isAM = rec === 'Anna'  || rec === 'Miquel';
+      console.log('[Diners] pagament:', p.type, 'receiver:', rec, 'amount:', amt, 'isJC:', isJC, 'isAM:', isAM);
       if(p.type === 'deposit'){
         if(isJC) bizumsJC += amt;
         if(isAM) bizumsAM += amt;
       } else {
-        // remaining o qualsevol altre tipus = cobro del dia
         if(isJC) cobrosDiaJC += amt;
         if(isAM) cobrosDiaAM += amt;
       }
     });
   });
+  console.log('[Diners] bizumsJC:', bizumsJC, 'bizumsAM:', bizumsAM, 'cobrosDiaJC:', cobrosDiaJC, 'cobrosDiaAM:', cobrosDiaAM);
 
   // FORMULA EXACTA (igual que l'Excel):
   // totalRealEstancia = tot el cobrat entre les dues parts (cobros dia + bizums/senyals)
