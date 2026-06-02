@@ -245,6 +245,10 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         <div class="form-group"><label class="form-label">Nens</label><input id="f-children" type="number" class="form-input" placeholder="0" min="0" value="0" oninput="updateCreateSummary()"></div>
         <div class="form-group"><label class="form-label">Preu nen</label><input id="f-preu-nen" type="number" class="form-input" placeholder="0" min="0" step="0.01" oninput="updateCreateSummary()"></div>
       </div>
+      <div class="field-grid">
+        <div class="form-group"><label class="form-label">Preu paella/persona</label><input id="f-preu-paella" type="number" class="form-input" placeholder="0 (sense paella)" min="0" step="0.01" value="0" oninput="updateCreateSummary()"></div>
+        <div class="form-group"><label class="form-label">Total paella</label><input id="f-paella-total" type="text" class="form-input" readonly style="background:var(--surface2);color:var(--ink3)"></div>
+      </div>
     </div>
 
     <div id="airbnbFields" class="hide">
@@ -265,6 +269,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <div class="inline-summary">
       <div class="inline-summary-row"><span>Total adults / estada</span><strong id="sumAdults">0 €</strong></div>
       <div class="inline-summary-row"><span>Total nens</span><strong id="sumChildren">0 €</strong></div>
+      <div class="inline-summary-row"><span>Total paella (Jordi i Carla)</span><strong id="sumPaella">0 €</strong></div>
       <div class="inline-summary-row"><span>Total general</span><strong id="sumTotal">0 €</strong></div>
     </div>
     <div class="form-group">
@@ -480,6 +485,7 @@ function normalizeReserva(r){
   r.childPrice = Number(r.childPrice || 0);
   r.guests = Number(r.guests || 0);
   r.stayTotal = Number(r.stayTotal || 0);
+  r.paellaPrice = Number(r.paellaPrice || 0);
   r.depositRequired = Number(r.depositRequired ?? 50);
   r.notes = r.notes || '';
   const _im = r.importManual;
@@ -493,12 +499,16 @@ function normalizeReserva(r){
     const calcTotal = r.totalAdults + r.totalChildren;
     const minim = MINIMS_ESPAI[r.tipus] || 0;
     const calcAmbMinim = Math.max(calcTotal, minim);
-    r.total = (r.importManual !== null) ? r.importManual : calcAmbMinim;
+    r.estanciaTotal = (r.importManual !== null) ? r.importManual : calcAmbMinim;
+    r.paellaTotal = r.paellaPrice * r.totalPeople;
+    r.total = r.estanciaTotal + r.paellaTotal;
   }else{
     r.totalAdults = r.stayTotal;
     r.totalChildren = 0;
     r.totalPeople = r.guests || r.adults || 0;
-    r.total = (r.importManual !== null) ? r.importManual : r.stayTotal;
+    r.paellaTotal = 0;
+    r.estanciaTotal = (r.importManual !== null) ? r.importManual : r.stayTotal;
+    r.total = r.estanciaTotal;
   }
   const deposit = r.payments.find(p => p.type === 'deposit') || null;
   const remaining = r.payments.find(p => p.type === 'remaining') || null;
@@ -677,13 +687,16 @@ function getCreateValues(){
   if(reservaTypeSel === 'Airbnb'){
     const stayTotal = Number(document.getElementById('f-stay-total').value || 0);
     const guests = Number(document.getElementById('f-guests').value || 0);
-    return { totalAdults: stayTotal, totalChildren: 0, total: stayTotal, guests };
+    return { totalAdults: stayTotal, totalChildren: 0, total: stayTotal, guests, paellaPrice: 0, paellaTotal: 0, totalPeople: guests };
   }
   const adults = Number(document.getElementById('f-adults').value || 0);
   const adultPrice = Number(document.getElementById('f-preu-adult').value || 0);
   const children = Number(document.getElementById('f-children').value || 0);
   const childPrice = Number(document.getElementById('f-preu-nen').value || 0);
-  return { adults, adultPrice, children, childPrice, totalAdults: adults*adultPrice, totalChildren: children*childPrice, total: adults*adultPrice + children*childPrice };
+  const paellaPrice = Number(document.getElementById('f-preu-paella').value || 0);
+  const totalPeople = adults + children;
+  const paellaTotal = paellaPrice * totalPeople;
+  return { adults, adultPrice, children, childPrice, totalAdults: adults*adultPrice, totalChildren: children*childPrice, total: adults*adultPrice + children*childPrice, paellaPrice, paellaTotal, totalPeople };
 }
 function updateCreateSummary(){
   const v = getCreateValues();
@@ -696,10 +709,14 @@ function updateCreateSummary(){
   const importManual = (imRaw !== '' && Number(imRaw) > 0) ? Number(imRaw) : null;
   document.getElementById('sumAdults').textContent = euro(v.totalAdults || 0);
   document.getElementById('sumChildren').textContent = euro(v.totalChildren || 0);
+  const paellaTotalEl = document.getElementById('sumPaella');
+  if(paellaTotalEl) paellaTotalEl.textContent = euro(v.paellaTotal || 0);
+  const paellaTotalInput = document.getElementById('f-paella-total');
+  if(paellaTotalInput) paellaTotalInput.value = euro(v.paellaTotal || 0);
   if(importManual !== null){
     document.getElementById('sumTotal').textContent = euro(importManual) + ' (import manual)';
   } else {
-    document.getElementById('sumTotal').textContent = euro(calcAmbMinim) + (minimAplicat ? ` (mínim ${minim}€)` : '');
+    document.getElementById('sumTotal').textContent = euro(calcAmbMinim + (v.paellaTotal || 0)) + (minimAplicat ? ` (mínim estància ${minim}€)` : '');
   }
 }
 function buildReservaFromForm(){
@@ -744,6 +761,7 @@ function buildReservaFromForm(){
     if(!data){ toast('Falta la data de la barbacoa'); return null; }
     reserva.data = data;
     reserva.adults = v.adults; reserva.adultPrice = v.adultPrice; reserva.children = v.children; reserva.childPrice = v.childPrice;
+    reserva.paellaPrice = v.paellaPrice || 0;
   }
 
   const existing = editingId ? reserves.find(r => r.id === editingId) : null;
@@ -782,6 +800,7 @@ function fillFormForEdit(r){
     document.getElementById('f-preu-adult').value = r.adultPrice || 0;
     document.getElementById('f-children').value = r.children || 0;
     document.getElementById('f-preu-nen').value = r.childPrice || 0;
+    document.getElementById('f-preu-paella').value = r.paellaPrice || 0;
   }
   document.getElementById('f-import-manual').value = (r.importManual !== null && r.importManual > 0) ? r.importManual : '';
   updateCreateSummary();
@@ -794,7 +813,7 @@ function clearCreateForm(){
   document.getElementById('cancelEditButton').classList.add('hide');
   document.getElementById('f-nom').value=''; document.getElementById('f-telefon').value=''; document.getElementById('f-notes').value='';
   document.getElementById('f-data').value=avui();
-  document.getElementById('f-adults').value='0'; document.getElementById('f-preu-adult').value=''; document.getElementById('f-children').value='0'; document.getElementById('f-preu-nen').value='';
+  document.getElementById('f-adults').value='0'; document.getElementById('f-preu-adult').value=''; document.getElementById('f-children').value='0'; document.getElementById('f-preu-nen').value=''; document.getElementById('f-preu-paella').value='0';
   document.getElementById('f-checkin').value=avui(); document.getElementById('f-checkout').value=''; document.getElementById('f-guests').value='2'; document.getElementById('f-stay-total').value='';
   document.getElementById('f-senyal').value='50'; document.getElementById('f-bizum-data').value=avui(); document.getElementById('f-receptor').value=''; document.getElementById('f-metode').value='Bizum';
   document.getElementById('f-import-manual').value = '';
@@ -946,11 +965,12 @@ function inCurrentDinersPeriod(r, base){
 function renderDinersPage(){
   const base = document.getElementById('diners-data').value || avui();
   const dr = reserves.filter(r => inCurrentDinersPeriod(r, base));
-  let totalGeneral=0, totalSignals=0, totalResta=0, jordiCarla=0, annaMiquel=0;
+  // Acumular per receptor: senyals (deposit) i cobros del dia (remaining)
+  let jordiCarla=0, annaMiquel=0;
+  let totalEstancia=0, totalPaella=0;
   dr.forEach(r => {
-    totalGeneral += r.total;
-    totalSignals += r.depositPaid;
-    totalResta += r.remainingPaid;
+    totalEstancia += r.estanciaTotal || 0;
+    totalPaella   += r.paellaTotal  || 0;
     const payments = r.payments || [];
     payments.forEach(p => {
       const amt = Number(p.amount||0);
@@ -958,13 +978,28 @@ function renderDinersPage(){
       if(p.receiver === 'Anna' || p.receiver === 'Miquel') annaMiquel += amt;
     });
   });
-  // FORMULA CORRECTA:
-  // jordiCarla i annaMiquel ja contenen TOT el cobrat per cada part (senyals + cobros dia)
-  // El total real = tot el que s'ha cobrat entre les dues parts
-  const totalRealEstancia = jordiCarla + annaMiquel;  // ex: 971 + 100 = 1071
-  const meitat = totalRealEstancia / 2;               // ex: 535.5
-  const ajustJC = meitat - jordiCarla;                // ex: 535.5 - 971 = -435.5
-  const ajustAM = meitat - annaMiquel;                // ex: 535.5 - 100 = +435.5
+  // Total real cobrat entre totes dues parts
+  const totalRealCobrat = jordiCarla + annaMiquel;
+  // L'estància real = total de totes les estàncies (sense paella)
+  // La meitat de l'estància és el que li toca a cada part
+  // La paella és íntegrament per Jordi i Carla
+  // PERÒ: els pagaments no estan separats per estància/paella,
+  // el client paga un únic total. Per tant calculem:
+  //   - Total real = el que s'ha cobrat entre tots (jordiCarla + annaMiquel)
+  //   - D'aquest total real, la paella (paellaTotal) va a JC
+  //   - La resta (totalRealCobrat - paellaTotal) es reparteix al 50%
+  // Si paellaTotal > totalRealCobrat (no s'ha cobrat tot), el que s'ha cobrat
+  // es considera primer de paella fins esgotar-la, la resta d'estància.
+  const paellaACobrar = Math.min(totalPaella, totalRealCobrat);
+  const estanciaACobrar = totalRealCobrat - paellaACobrar;
+  const meitat = estanciaACobrar / 2;
+  // Quant ha rebut realment cada part?
+  // JC: el que han cobrat menys la part de paella que els correspon
+  // La paella és 100% de JC, per tant els "beneficia" fins al total de paella
+  const jcCorrespon = meitat + paellaACobrar;  // meitat d'estància + tota la paella cobrada
+  const amCorrespon = meitat;
+  const ajustJC = jcCorrespon - jordiCarla;
+  const ajustAM = amCorrespon - annaMiquel;
   const label = dinersRange === 'day' ? fmt(base) : (() => {
     const sv = document.getElementById('diners-start').value;
     const ev = document.getElementById('diners-end').value;
@@ -973,18 +1008,22 @@ function renderDinersPage(){
   const box = document.getElementById('diners-resultat');
   if(!dr.length){ box.innerHTML = `<div class="empty"><div class="empty-txt">Sense barbacoes en aquest període</div></div>`; renderBizums(); return; }
   box.innerHTML = `
-    <div class="d-hero"><div class="dh-eye">Barbacoes · ${label}</div><div class="dh-val">${euro(totalGeneral)}</div><div class="dh-foot">${dr.length} reserva${dr.length!==1?'s':''} · repartit entre 2</div></div>
+    <div class="d-hero"><div class="dh-eye">Barbacoes · ${label}</div><div class="dh-val">${euro(totalEstancia + totalPaella)}</div><div class="dh-foot">${dr.length} reserva${dr.length!==1?'s':''} · estància + paella</div></div>
     <div class="diners-grid-4">
-      <div class="dcard meitat"><div class="dc-eye">Total cobrat</div><div class="dc-val">${euro(totalRealEstancia)}</div><div class="dc-note">JC + AM</div></div>
-      <div class="dcard total"><div class="dc-eye">Meitat</div><div class="dc-val">${euro(meitat)}</div><div class="dc-note">50% per a cada part</div></div>
+      <div class="dcard meitat"><div class="dc-eye">Total cobrat</div><div class="dc-val">${euro(totalRealCobrat)}</div><div class="dc-note">JC + AM</div></div>
+      <div class="dcard total"><div class="dc-eye">Meitat estància</div><div class="dc-val">${euro(meitat)}</div><div class="dc-note">50% estància s/paella</div></div>
       <div class="dcard nos"><div class="dc-eye">Jordi i Carla</div><div class="dc-val">${ajustJC >= 0 ? euro(ajustJC) : '-'+euro(Math.abs(ajustJC))}</div><div class="dc-note">${ajustJC >= 0 ? 'a rebre' : 'a donar'}</div></div>
       <div class="dcard ells"><div class="dc-eye">Anna i Miquel</div><div class="dc-val">${ajustAM >= 0 ? euro(ajustAM) : '-'+euro(Math.abs(ajustAM))}</div><div class="dc-note">${ajustAM >= 0 ? 'a rebre' : 'a donar'}</div></div>
     </div>
     <div class="calc-block">
+      <div class="calc-line"><span class="cl-k">Total estància (sense paella)</span><span class="cl-v">${euro(totalEstancia)}</span></div>
+      <div class="calc-line"><span class="cl-k">Total paella (íntegra JC)</span><span class="cl-v earth">${euro(totalPaella)}</span></div>
       <div class="calc-line"><span class="cl-k">Cobrat per Jordi i Carla</span><span class="cl-v earth">${euro(jordiCarla)}</span></div>
       <div class="calc-line"><span class="cl-k">Cobrat per Anna i Miquel</span><span class="cl-v earth">${euro(annaMiquel)}</span></div>
-      <div class="calc-line"><span class="cl-k">Total cobrat real</span><span class="cl-v">${euro(totalRealEstancia)}</span></div>
-      <div class="calc-line"><span class="cl-k">Meitat (cada part)</span><span class="cl-v green">${euro(meitat)}</span></div>
+      <div class="calc-line"><span class="cl-k">Total cobrat real</span><span class="cl-v">${euro(totalRealCobrat)}</span></div>
+      <div class="calc-line"><span class="cl-k">Paella cobrada (JC)</span><span class="cl-v">${euro(paellaACobrar)}</span></div>
+      <div class="calc-line"><span class="cl-k">Estància cobrada a repartir</span><span class="cl-v">${euro(estanciaACobrar)}</span></div>
+      <div class="calc-line"><span class="cl-k">Meitat estància (cada part)</span><span class="cl-v green">${euro(meitat)}</span></div>
       <div class="calc-line highlight"><span class="cl-k" style="font-weight:700;color:var(--ink)">Saldo Jordi i Carla</span><span class="cl-v strong">${ajustJC >= 0 ? euro(ajustJC)+' a rebre' : euro(Math.abs(ajustJC))+' a donar'}</span></div>
       <div class="calc-line"><span class="cl-k">Saldo Anna i Miquel</span><span class="cl-v earth">${ajustAM >= 0 ? euro(ajustAM)+' a rebre' : euro(Math.abs(ajustAM))+' a donar'}</span></div>
     </div>`;
